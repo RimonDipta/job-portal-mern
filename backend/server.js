@@ -11,6 +11,8 @@ import userRoutes from "./routes/userRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 
+import { isAuthenticated } from "./middleware/auth.js";
+import { authorizeResumeAccess } from "./middleware/resumeAccess.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -71,9 +73,13 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Serve uploaded files statically.
+// Uploaded resumes are NOT publicly accessible.
+// Authentication and ownership/application checks happen before
+// Express serves the requested file.
 app.use(
   "/uploads",
+  isAuthenticated,
+  authorizeResumeAccess,
   express.static(path.join(process.cwd(), "uploads"), {
     index: false,
   }),

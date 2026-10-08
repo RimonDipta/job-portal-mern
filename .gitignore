@@ -1,26 +1,36 @@
-# Dependencies
-node_modules/
-
-# Environment variables
-.env
-.env.local
-
 # Logs
 logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Build folders
-dist/
-build/
+# Dependencies
+node_modules
 
-# Cache
-.cache/
+# Build output
+dist
+dist-ssr
 
-# OS
+# Environment files
+*.local
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# IDE
-.vscode/
-.idea/
+# Uploaded user files
+backend/uploads/*
+!backend/uploads/.gitkeep
