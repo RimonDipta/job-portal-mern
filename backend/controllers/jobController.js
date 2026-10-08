@@ -1,6 +1,53 @@
 import Job from "../models/Job.js";
+import {
+  escapeRegex,
+  isNonEmptyString,
+  isValidObjectId,
+  normalizeString,
+  parseRequirements,
+} from "../utils/validation.js";
 
 const recruiterFields = "name role";
+
+const validateJobFields = ({
+  title,
+  description,
+  requirements,
+  salary,
+  location,
+  jobType,
+  position,
+  company,
+}) => {
+  const fields = {
+    title,
+    description,
+    salary,
+    location,
+    jobType,
+    company,
+  };
+
+  for (const [field, value] of Object.entries(fields)) {
+    if (!isNonEmptyString(value)) {
+      return `${field} is required.`;
+    }
+  }
+
+  const parsedRequirements = parseRequirements(requirements);
+
+  if (parsedRequirements.length === 0) {
+    return "At least one job requirement is required.";
+  }
+
+  const parsedPosition = Number(position);
+
+  if (!Number.isInteger(parsedPosition) || parsedPosition < 1) {
+    return "Positions must be a positive whole number.";
+  }
+
+  return null;
+};
 
 export const postJob = async (req, res) => {
   try {
@@ -15,57 +62,37 @@ export const postJob = async (req, res) => {
       company,
     } = req.body;
 
-    const userId = req.id;
+    const validationError = validateJobFields({
+      title,
+      description,
+      requirements,
+      salary,
+      location,
+      jobType,
+      position,
+      company,
+    });
 
-    if (
-      !title ||
-      !description ||
-      !requirements ||
-      !salary ||
-      !location ||
-      !jobType ||
-      !position ||
-      !company
-    ) {
+    if (validationError) {
       return res.status(400).json({
-        message: "All fields are required.",
+        message: validationError,
         success: false,
       });
     }
 
-    const parsedRequirements = Array.isArray(requirements)
-      ? requirements
-      : requirements
-          .split(",")
-          .map((requirement) => requirement.trim())
-          .filter(Boolean);
-
-    if (parsedRequirements.length === 0) {
-      return res.status(400).json({
-        message: "At least one job requirement is required.",
-        success: false,
-      });
-    }
-
+    const parsedRequirements = parseRequirements(requirements);
     const parsedPosition = Number(position);
 
-    if (!Number.isInteger(parsedPosition) || parsedPosition < 1) {
-      return res.status(400).json({
-        message: "Positions must be a positive whole number.",
-        success: false,
-      });
-    }
-
     const job = await Job.create({
-      title: title.trim(),
-      description: description.trim(),
+      title: normalizeString(title),
+      description: normalizeString(description),
       requirements: parsedRequirements,
-      salary: salary.trim(),
-      location: location.trim(),
-      jobType: jobType.trim(),
+      salary: normalizeString(salary),
+      location: normalizeString(location),
+      jobType: normalizeString(jobType),
       position: parsedPosition,
-      company: company.trim(),
-      created_by: userId,
+      company: normalizeString(company),
+      created_by: req.id,
     });
 
     return res.status(201).json({
@@ -85,26 +112,29 @@ export const postJob = async (req, res) => {
 
 export const getAllJobs = async (req, res) => {
   try {
-    const keyword = req.query.keyword?.trim() || "";
-    const category = req.query.category?.trim() || "";
-    const location = req.query.location?.trim() || "";
+    const keyword = normalizeString(req.query.keyword);
+    const category = normalizeString(req.query.category);
+    const location = normalizeString(req.query.location);
 
     const query = {};
-
     const searchConditions = [];
 
     if (keyword) {
+      const safeKeyword = escapeRegex(keyword);
+
       searchConditions.push(
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } },
-        { company: { $regex: keyword, $options: "i" } },
+        { title: { $regex: safeKeyword, $options: "i" } },
+        { description: { $regex: safeKeyword, $options: "i" } },
+        { company: { $regex: safeKeyword, $options: "i" } },
       );
     }
 
     if (category) {
+      const safeCategory = escapeRegex(category);
+
       searchConditions.push(
-        { title: { $regex: category, $options: "i" } },
-        { description: { $regex: category, $options: "i" } },
+        { title: { $regex: safeCategory, $options: "i" } },
+        { description: { $regex: safeCategory, $options: "i" } },
       );
     }
 
@@ -114,7 +144,7 @@ export const getAllJobs = async (req, res) => {
 
     if (location) {
       query.location = {
-        $regex: location,
+        $regex: escapeRegex(location),
         $options: "i",
       };
     }
@@ -142,7 +172,14 @@ export const getAllJobs = async (req, res) => {
 
 export const getJobById = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const { id: jobId } = req.params;
+
+    if (!isValidObjectId(jobId)) {
+      return res.status(400).json({
+        message: "Invalid job ID.",
+        success: false,
+      });
+    }
 
     const job = await Job.findById(jobId).populate({
       path: "created_by",
@@ -172,10 +209,8 @@ export const getJobById = async (req, res) => {
 
 export const getAdminJobs = async (req, res) => {
   try {
-    const adminId = req.id;
-
     const jobs = await Job.find({
-      created_by: adminId,
+      created_by: req.id,
     }).sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -194,18 +229,14 @@ export const getAdminJobs = async (req, res) => {
 
 export const updateJob = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const { id: jobId } = req.params;
 
-    const {
-      title,
-      description,
-      requirements,
-      salary,
-      location,
-      jobType,
-      position,
-      company,
-    } = req.body;
+    if (!isValidObjectId(jobId)) {
+      return res.status(400).json({
+        message: "Invalid job ID.",
+        success: false,
+      });
+    }
 
     const job = await Job.findById(jobId);
 
@@ -223,21 +254,41 @@ export const updateJob = async (req, res) => {
       });
     }
 
+    const {
+      title,
+      description,
+      requirements,
+      salary,
+      location,
+      jobType,
+      position,
+      company,
+    } = req.body;
+
     if (title !== undefined) {
-      job.title = title.trim();
+      if (!isNonEmptyString(title)) {
+        return res.status(400).json({
+          message: "Title cannot be empty.",
+          success: false,
+        });
+      }
+
+      job.title = normalizeString(title);
     }
 
     if (description !== undefined) {
-      job.description = description.trim();
+      if (!isNonEmptyString(description)) {
+        return res.status(400).json({
+          message: "Description cannot be empty.",
+          success: false,
+        });
+      }
+
+      job.description = normalizeString(description);
     }
 
     if (requirements !== undefined) {
-      const parsedRequirements = Array.isArray(requirements)
-        ? requirements
-        : requirements
-            .split(",")
-            .map((requirement) => requirement.trim())
-            .filter(Boolean);
+      const parsedRequirements = parseRequirements(requirements);
 
       if (parsedRequirements.length === 0) {
         return res.status(400).json({
@@ -250,15 +301,36 @@ export const updateJob = async (req, res) => {
     }
 
     if (salary !== undefined) {
-      job.salary = salary.trim();
+      if (!isNonEmptyString(salary)) {
+        return res.status(400).json({
+          message: "Salary cannot be empty.",
+          success: false,
+        });
+      }
+
+      job.salary = normalizeString(salary);
     }
 
     if (location !== undefined) {
-      job.location = location.trim();
+      if (!isNonEmptyString(location)) {
+        return res.status(400).json({
+          message: "Location cannot be empty.",
+          success: false,
+        });
+      }
+
+      job.location = normalizeString(location);
     }
 
     if (jobType !== undefined) {
-      job.jobType = jobType.trim();
+      if (!isNonEmptyString(jobType)) {
+        return res.status(400).json({
+          message: "Job type cannot be empty.",
+          success: false,
+        });
+      }
+
+      job.jobType = normalizeString(jobType);
     }
 
     if (position !== undefined) {
@@ -275,7 +347,14 @@ export const updateJob = async (req, res) => {
     }
 
     if (company !== undefined) {
-      job.company = company.trim();
+      if (!isNonEmptyString(company)) {
+        return res.status(400).json({
+          message: "Company cannot be empty.",
+          success: false,
+        });
+      }
+
+      job.company = normalizeString(company);
     }
 
     await job.save();
@@ -297,7 +376,14 @@ export const updateJob = async (req, res) => {
 
 export const deleteJob = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const { id: jobId } = req.params;
+
+    if (!isValidObjectId(jobId)) {
+      return res.status(400).json({
+        message: "Invalid job ID.",
+        success: false,
+      });
+    }
 
     const job = await Job.findById(jobId);
 

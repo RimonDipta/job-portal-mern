@@ -1,16 +1,17 @@
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
+import { isValidObjectId } from "../utils/validation.js";
 
 const VALID_STATUSES = ["pending", "accepted", "rejected"];
 
 export const applyJob = async (req, res) => {
   try {
     const userId = req.id;
-    const jobId = req.params.id;
+    const { id: jobId } = req.params;
 
-    if (!jobId) {
+    if (!isValidObjectId(jobId)) {
       return res.status(400).json({
-        message: "Job ID is required.",
+        message: "Invalid job ID.",
         success: false,
       });
     }
@@ -36,11 +37,24 @@ export const applyJob = async (req, res) => {
       });
     }
 
-    const newApplication = await Application.create({
-      job: jobId,
-      applicant: userId,
-      status: "pending",
-    });
+    let newApplication;
+
+    try {
+      newApplication = await Application.create({
+        job: jobId,
+        applicant: userId,
+        status: "pending",
+      });
+    } catch (error) {
+      if (error?.code === 11000) {
+        return res.status(409).json({
+          message: "You have already applied for this job.",
+          success: false,
+        });
+      }
+
+      throw error;
+    }
 
     job.applications.push(newApplication._id);
 
@@ -62,10 +76,8 @@ export const applyJob = async (req, res) => {
 
 export const getAppliedJobs = async (req, res) => {
   try {
-    const userId = req.id;
-
     const applications = await Application.find({
-      applicant: userId,
+      applicant: req.id,
     })
       .sort({ createdAt: -1 })
       .populate({
@@ -92,15 +104,16 @@ export const getAppliedJobs = async (req, res) => {
 
 export const getApplicants = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const { id: jobId } = req.params;
 
-    const job = await Job.findById(jobId).populate({
-      path: "applications",
-      populate: {
-        path: "applicant",
-        select: "name email role profile",
-      },
-    });
+    if (!isValidObjectId(jobId)) {
+      return res.status(400).json({
+        message: "Invalid job ID.",
+        success: false,
+      });
+    }
+
+    const job = await Job.findById(jobId);
 
     if (!job) {
       return res.status(404).json({
@@ -115,6 +128,14 @@ export const getApplicants = async (req, res) => {
         success: false,
       });
     }
+
+    await job.populate({
+      path: "applications",
+      populate: {
+        path: "applicant",
+        select: "name email role profile",
+      },
+    });
 
     return res.status(200).json({
       job,
@@ -133,9 +154,17 @@ export const getApplicants = async (req, res) => {
 export const updateStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const applicationId = req.params.id;
+    const { id: applicationId } = req.params;
 
-    const normalizedStatus = status?.toLowerCase();
+    if (!isValidObjectId(applicationId)) {
+      return res.status(400).json({
+        message: "Invalid application ID.",
+        success: false,
+      });
+    }
+
+    const normalizedStatus =
+      typeof status === "string" ? status.trim().toLowerCase() : "";
 
     if (!VALID_STATUSES.includes(normalizedStatus)) {
       return res.status(400).json({
