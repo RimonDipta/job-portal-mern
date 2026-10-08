@@ -12,25 +12,25 @@ import fs from "fs";
 
 const router = express.Router();
 
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads", { recursive: true });
+const uploadDirectory = path.join(process.cwd(), "uploads");
+
+if (!fs.existsSync(uploadDirectory)) {
+  fs.mkdirSync(uploadDirectory, {
+    recursive: true,
+  });
 }
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, uploadDirectory);
   },
 
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
 
-    cb(
-      null,
-      file.fieldname +
-        "-" +
-        uniqueSuffix +
-        path.extname(file.originalname).toLowerCase(),
-    );
+    const extension = path.extname(file.originalname).toLowerCase();
+
+    cb(null, `${file.fieldname}-${uniqueSuffix}${extension}`);
   },
 });
 
@@ -56,13 +56,23 @@ const upload = multer({
     const expectedMimeType = allowedFileTypes.get(extension);
 
     if (!expectedMimeType) {
-      return cb(new Error("Only PDF, DOC and DOCX resume files are allowed."));
+      const error = new Error(
+        "Only PDF, DOC and DOCX resume files are allowed.",
+      );
+
+      error.code = "INVALID_FILE_TYPE";
+
+      return cb(error);
     }
 
     if (file.mimetype !== expectedMimeType) {
-      return cb(
-        new Error("The uploaded file type does not match its extension."),
+      const error = new Error(
+        "The uploaded file type does not match its extension.",
       );
+
+      error.code = "INVALID_FILE_TYPE";
+
+      return cb(error);
     }
 
     cb(null, true);
