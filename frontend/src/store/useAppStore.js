@@ -1,47 +1,78 @@
 import { create } from "zustand";
 import axios from "axios";
 
-// Define the root API endpoint for backend communication
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 
-// Retrieve saved authentication session state if it exists
 const savedToken = localStorage.getItem("token");
 
 if (savedToken) {
   axios.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
 }
 
+const getStoredUser = () => {
+  try {
+    const storedUser = localStorage.getItem("user");
+
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch (error) {
+    console.warn("Unable to restore saved user session:", error);
+
+    localStorage.removeItem("user");
+
+    return null;
+  }
+};
+
 export const useAppStore = create((set, get) => ({
+  // =========================================================
   // Authentication State
-  user: JSON.parse(localStorage.getItem("user")) || null,
+  // =========================================================
+
+  user: getStoredUser(),
   token: savedToken || null,
   authLoading: false,
   authError: null,
 
+  // =========================================================
   // Jobs State
+  // =========================================================
+
   jobs: [],
   selectedJob: null,
   adminJobs: [],
   jobsLoading: false,
   jobsError: null,
 
+  // =========================================================
   // Applications State
+  // =========================================================
+
   appliedJobs: [],
   applicants: [],
   applicationStatusByJobId: {},
   applicationsLoading: false,
+  applicationsError: null,
 
-  // Actions - Authentication
+  // =========================================================
+  // Authentication Actions
+  // =========================================================
+
   register: async (userData) => {
-    set({ authLoading: true, authError: null });
+    set({
+      authLoading: true,
+      authError: null,
+    });
 
     try {
       const response = await axios.post("/user/register", userData);
 
-      set({ authLoading: false });
+      set({
+        authLoading: false,
+        authError: null,
+      });
 
       return {
         success: true,
@@ -70,6 +101,7 @@ export const useAppStore = create((set, get) => ({
 
     try {
       const response = await axios.post("/user/login", userData);
+
       const { user, token, message } = response.data;
 
       if (!user || !token) {
@@ -77,6 +109,7 @@ export const useAppStore = create((set, get) => ({
       }
 
       localStorage.setItem("user", JSON.stringify(user));
+
       localStorage.setItem("token", token);
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -85,7 +118,11 @@ export const useAppStore = create((set, get) => ({
         user,
         token,
         authLoading: false,
+        authError: null,
+        appliedJobs: [],
+        applicants: [],
         applicationStatusByJobId: {},
+        applicationsError: null,
       });
 
       return {
@@ -110,7 +147,10 @@ export const useAppStore = create((set, get) => ({
   },
 
   logout: async () => {
-    set({ authLoading: true });
+    set({
+      authLoading: true,
+      authError: null,
+    });
 
     try {
       await axios.get("/user/logout");
@@ -126,10 +166,15 @@ export const useAppStore = create((set, get) => ({
     set({
       user: null,
       token: null,
+
       adminJobs: [],
       appliedJobs: [],
       applicants: [],
       applicationStatusByJobId: {},
+
+      applicationsError: null,
+      authError: null,
+
       authLoading: false,
     });
 
@@ -154,11 +199,16 @@ export const useAppStore = create((set, get) => ({
 
       const { user, message } = response.data;
 
+      if (!user) {
+        throw new Error("Invalid profile response.");
+      }
+
       localStorage.setItem("user", JSON.stringify(user));
 
       set({
         user,
         authLoading: false,
+        authError: null,
       });
 
       return {
@@ -180,7 +230,10 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
-  // Actions - Jobs
+  // =========================================================
+  // Job Actions
+  // =========================================================
+
   fetchJobs: async (filters = {}) => {
     set({
       jobsLoading: true,
@@ -188,9 +241,10 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const { keyword, category } = filters;
+      const { keyword, category, location } = filters;
 
       let url = "/job/get";
+
       const params = [];
 
       if (keyword) {
@@ -201,16 +255,25 @@ export const useAppStore = create((set, get) => ({
         params.push(`category=${encodeURIComponent(category)}`);
       }
 
+      if (location) {
+        params.push(`location=${encodeURIComponent(location)}`);
+      }
+
       if (params.length > 0) {
         url += `?${params.join("&")}`;
       }
 
       const response = await axios.get(url);
 
+      const jobs = response.data.jobs || [];
+
       set({
-        jobs: response.data.jobs,
+        jobs,
         jobsLoading: false,
+        jobsError: null,
       });
+
+      return jobs;
     } catch (error) {
       const msg = error.response?.data?.message || "Failed to fetch jobs.";
 
@@ -218,6 +281,8 @@ export const useAppStore = create((set, get) => ({
         jobsLoading: false,
         jobsError: msg,
       });
+
+      return [];
     }
   },
 
@@ -231,12 +296,19 @@ export const useAppStore = create((set, get) => ({
     try {
       const response = await axios.get(`/job/get/${jobId}`);
 
+      const job = response.data.job;
+
+      if (!job) {
+        throw new Error("Invalid job response.");
+      }
+
       set({
-        selectedJob: response.data.job,
+        selectedJob: job,
         jobsLoading: false,
+        jobsError: null,
       });
 
-      return response.data.job;
+      return job;
     } catch (error) {
       const msg =
         error.response?.data?.message || "Failed to fetch job details.";
@@ -244,6 +316,7 @@ export const useAppStore = create((set, get) => ({
       set({
         jobsLoading: false,
         jobsError: msg,
+        selectedJob: null,
       });
 
       return null;
@@ -259,10 +332,15 @@ export const useAppStore = create((set, get) => ({
     try {
       const response = await axios.get("/job/getadminjobs");
 
+      const jobs = response.data.jobs || [];
+
       set({
-        adminJobs: response.data.jobs,
+        adminJobs: jobs,
         jobsLoading: false,
+        jobsError: null,
       });
+
+      return jobs;
     } catch (error) {
       const msg = error.response?.data?.message || "Failed to fetch your jobs.";
 
@@ -270,16 +348,24 @@ export const useAppStore = create((set, get) => ({
         jobsLoading: false,
         jobsError: msg,
       });
+
+      return [];
     }
   },
 
   createJob: async (jobData) => {
-    set({ jobsLoading: true });
+    set({
+      jobsLoading: true,
+      jobsError: null,
+    });
 
     try {
       const response = await axios.post("/job/post", jobData);
 
-      set({ jobsLoading: false });
+      set({
+        jobsLoading: false,
+        jobsError: null,
+      });
 
       await get().fetchAdminJobs();
 
@@ -290,7 +376,10 @@ export const useAppStore = create((set, get) => ({
     } catch (error) {
       const msg = error.response?.data?.message || "Failed to create job.";
 
-      set({ jobsLoading: false });
+      set({
+        jobsLoading: false,
+        jobsError: msg,
+      });
 
       return {
         success: false,
@@ -300,12 +389,18 @@ export const useAppStore = create((set, get) => ({
   },
 
   updateJob: async (jobId, jobData) => {
-    set({ jobsLoading: true });
+    set({
+      jobsLoading: true,
+      jobsError: null,
+    });
 
     try {
       const response = await axios.put(`/job/update/${jobId}`, jobData);
 
-      set({ jobsLoading: false });
+      set({
+        jobsLoading: false,
+        jobsError: null,
+      });
 
       await get().fetchAdminJobs();
 
@@ -316,7 +411,10 @@ export const useAppStore = create((set, get) => ({
     } catch (error) {
       const msg = error.response?.data?.message || "Failed to update job.";
 
-      set({ jobsLoading: false });
+      set({
+        jobsLoading: false,
+        jobsError: msg,
+      });
 
       return {
         success: false,
@@ -326,12 +424,18 @@ export const useAppStore = create((set, get) => ({
   },
 
   deleteJob: async (jobId) => {
-    set({ jobsLoading: true });
+    set({
+      jobsLoading: true,
+      jobsError: null,
+    });
 
     try {
       const response = await axios.delete(`/job/delete/${jobId}`);
 
-      set({ jobsLoading: false });
+      set({
+        jobsLoading: false,
+        jobsError: null,
+      });
 
       await get().fetchAdminJobs();
 
@@ -342,7 +446,10 @@ export const useAppStore = create((set, get) => ({
     } catch (error) {
       const msg = error.response?.data?.message || "Failed to delete job.";
 
-      set({ jobsLoading: false });
+      set({
+        jobsLoading: false,
+        jobsError: msg,
+      });
 
       return {
         success: false,
@@ -351,16 +458,23 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
-  // Actions - Applications
+  // =========================================================
+  // Application Actions
+  // =========================================================
 
   applyForJob: async (jobId) => {
-    set({ applicationsLoading: true });
+    set({
+      applicationsLoading: true,
+      applicationsError: null,
+    });
 
     try {
       const response = await axios.post(`/application/apply/${jobId}`);
 
       set((state) => ({
         applicationsLoading: false,
+        applicationsError: null,
+
         applicationStatusByJobId: {
           ...state.applicationStatusByJobId,
           [jobId]: "pending",
@@ -374,7 +488,10 @@ export const useAppStore = create((set, get) => ({
     } catch (error) {
       const msg = error.response?.data?.message || "Failed to apply for job.";
 
-      set({ applicationsLoading: false });
+      set({
+        applicationsLoading: false,
+        applicationsError: msg,
+      });
 
       return {
         success: false,
@@ -384,7 +501,10 @@ export const useAppStore = create((set, get) => ({
   },
 
   fetchAppliedJobs: async () => {
-    set({ applicationsLoading: true });
+    set({
+      applicationsLoading: true,
+      applicationsError: null,
+    });
 
     try {
       const response = await axios.get("/application/get");
@@ -405,26 +525,45 @@ export const useAppStore = create((set, get) => ({
         appliedJobs: applications,
         applicationStatusByJobId: statusMap,
         applicationsLoading: false,
+        applicationsError: null,
       });
 
-      return applications;
+      return {
+        success: true,
+        applications,
+      };
     } catch (error) {
-      console.error(error);
+      const msg =
+        error.response?.data?.message || "Failed to fetch your applications.";
 
       set({
         applicationsLoading: false,
+        applicationsError: msg,
       });
 
-      return [];
+      return {
+        success: false,
+        applications: [],
+        message: msg,
+      };
     }
   },
 
   fetchApplicationStatus: async (jobId) => {
-    if (!get().user || get().user.role !== "candidate") {
-      return null;
+    const currentUser = get().user;
+
+    if (!currentUser || currentUser.role !== "candidate") {
+      return {
+        success: false,
+        status: null,
+        message: "Only candidates can view application status.",
+      };
     }
 
-    set({ applicationsLoading: true });
+    set({
+      applicationsLoading: true,
+      applicationsError: null,
+    });
 
     try {
       const response = await axios.get("/application/get");
@@ -441,49 +580,87 @@ export const useAppStore = create((set, get) => ({
 
       set((state) => ({
         applicationsLoading: false,
+        applicationsError: null,
+
         applicationStatusByJobId: {
           ...state.applicationStatusByJobId,
           [jobId]: status,
         },
       }));
 
-      return status;
+      return {
+        success: true,
+        status,
+      };
     } catch (error) {
-      console.error(error);
+      const msg =
+        error.response?.data?.message || "Failed to fetch application status.";
 
-      set({ applicationsLoading: false });
+      set({
+        applicationsLoading: false,
+        applicationsError: msg,
+      });
 
-      return null;
+      return {
+        success: false,
+        status: null,
+        message: msg,
+      };
     }
   },
 
   fetchApplicants: async (jobId) => {
     set({
       applicationsLoading: true,
+      applicationsError: null,
       applicants: [],
     });
 
     try {
       const response = await axios.get(`/application/${jobId}/applicants`);
 
+      const job = response.data.job;
+
+      if (!job) {
+        throw new Error("Invalid applicants response.");
+      }
+
+      const applicants = job.applications || [];
+
       set({
-        applicants: response.data.job.applications,
+        applicants,
         applicationsLoading: false,
+        applicationsError: null,
       });
 
-      return response.data.job;
+      return {
+        success: true,
+        job,
+      };
     } catch (error) {
-      console.error(error);
+      const msg =
+        error.response?.data?.message || "Failed to fetch applicants.";
 
       set({
         applicationsLoading: false,
+        applicationsError: msg,
+        applicants: [],
       });
 
-      return null;
+      return {
+        success: false,
+        job: null,
+        message: msg,
+      };
     }
   },
 
   updateApplicationStatus: async (applicationId, status, jobId) => {
+    set({
+      applicationsLoading: true,
+      applicationsError: null,
+    });
+
     try {
       const response = await axios.put(
         `/application/status/${applicationId}/update`,
@@ -492,6 +669,11 @@ export const useAppStore = create((set, get) => ({
 
       if (jobId) {
         await get().fetchApplicants(jobId);
+      } else {
+        set({
+          applicationsLoading: false,
+          applicationsError: null,
+        });
       }
 
       return {
@@ -501,6 +683,11 @@ export const useAppStore = create((set, get) => ({
     } catch (error) {
       const msg =
         error.response?.data?.message || "Failed to update applicant status.";
+
+      set({
+        applicationsLoading: false,
+        applicationsError: msg,
+      });
 
       return {
         success: false,
