@@ -1,4 +1,5 @@
 import Job from "../models/Job.js";
+import Application from "../models/Application.js";
 import {
   escapeRegex,
   isNonEmptyString,
@@ -401,10 +402,17 @@ export const deleteJob = async (req, res) => {
       });
     }
 
+    // Remove every application associated with the job before
+    // removing the job itself. This prevents orphaned application
+    // documents from remaining in the database.
+    await Application.deleteMany({
+      job: jobId,
+    });
+
     await Job.findByIdAndDelete(jobId);
 
     return res.status(200).json({
-      message: "Job deleted successfully.",
+      message: "Job and related applications deleted successfully.",
       success: true,
     });
   } catch (error) {
