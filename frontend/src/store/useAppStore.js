@@ -1,16 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
-
-axios.defaults.baseURL = API_URL;
-axios.defaults.withCredentials = true;
-
-const savedToken = localStorage.getItem("token");
-
-if (savedToken) {
-  axios.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
-}
+import api, { setUnauthorizedHandler } from "../lib/api";
 
 const getStoredUser = () => {
   try {
@@ -32,7 +21,7 @@ export const useAppStore = create((set, get) => ({
   // =========================================================
 
   user: getStoredUser(),
-  token: savedToken || null,
+  token: localStorage.getItem("token") || null,
   authLoading: false,
   authError: null,
 
@@ -67,7 +56,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.post("/user/register", userData);
+      const response = await api.post("/user/register", userData);
 
       set({
         authLoading: false,
@@ -100,7 +89,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.post("/user/login", userData);
+      const response = await api.post("/user/login", userData);
 
       const { user, token, message } = response.data;
 
@@ -112,16 +101,16 @@ export const useAppStore = create((set, get) => ({
 
       localStorage.setItem("token", token);
 
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
       set({
         user,
         token,
         authLoading: false,
         authError: null,
+
         appliedJobs: [],
         applicants: [],
         applicationStatusByJobId: {},
+
         applicationsError: null,
       });
 
@@ -153,15 +142,13 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      await axios.get("/user/logout");
+      await api.get("/user/logout");
     } catch (error) {
       console.warn("Logout request skipped on server:", error.message);
     }
 
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-
-    delete axios.defaults.headers.common["Authorization"];
 
     set({
       user: null,
@@ -171,6 +158,8 @@ export const useAppStore = create((set, get) => ({
       appliedJobs: [],
       applicants: [],
       applicationStatusByJobId: {},
+
+      selectedJob: null,
 
       applicationsError: null,
       authError: null,
@@ -191,7 +180,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.put("/user/profile/update", formData, {
+      const response = await api.put("/user/profile/update", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -263,7 +252,7 @@ export const useAppStore = create((set, get) => ({
         url += `?${params.join("&")}`;
       }
 
-      const response = await axios.get(url);
+      const response = await api.get(url);
 
       const jobs = response.data.jobs || [];
 
@@ -294,7 +283,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.get(`/job/get/${jobId}`);
+      const response = await api.get(`/job/get/${jobId}`);
 
       const job = response.data.job;
 
@@ -330,7 +319,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.get("/job/getadminjobs");
+      const response = await api.get("/job/getadminjobs");
 
       const jobs = response.data.jobs || [];
 
@@ -360,7 +349,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.post("/job/post", jobData);
+      const response = await api.post("/job/post", jobData);
 
       set({
         jobsLoading: false,
@@ -395,7 +384,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.put(`/job/update/${jobId}`, jobData);
+      const response = await api.put(`/job/update/${jobId}`, jobData);
 
       set({
         jobsLoading: false,
@@ -430,7 +419,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.delete(`/job/delete/${jobId}`);
+      const response = await api.delete(`/job/delete/${jobId}`);
 
       set({
         jobsLoading: false,
@@ -469,7 +458,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.post(`/application/apply/${jobId}`);
+      const response = await api.post(`/application/apply/${jobId}`);
 
       set((state) => ({
         applicationsLoading: false,
@@ -507,7 +496,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.get("/application/get");
+      const response = await api.get("/application/get");
 
       const applications = response.data.applications || [];
 
@@ -566,7 +555,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.get("/application/get");
+      const response = await api.get("/application/get");
 
       const applications = response.data.applications || [];
 
@@ -617,7 +606,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.get(`/application/${jobId}/applicants`);
+      const response = await api.get(`/application/${jobId}/applicants`);
 
       const job = response.data.job;
 
@@ -662,7 +651,7 @@ export const useAppStore = create((set, get) => ({
     });
 
     try {
-      const response = await axios.put(
+      const response = await api.put(
         `/application/status/${applicationId}/update`,
         { status },
       );
@@ -696,3 +685,32 @@ export const useAppStore = create((set, get) => ({
     }
   },
 }));
+
+// =========================================================
+// Global Authentication Failure Handling
+// =========================================================
+
+setUnauthorizedHandler(() => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+
+  useAppStore.setState({
+    user: null,
+    token: null,
+
+    authLoading: false,
+    authError: "Your session has expired. Please log in again.",
+
+    adminJobs: [],
+    appliedJobs: [],
+    applicants: [],
+    applicationStatusByJobId: {},
+
+    selectedJob: null,
+
+    applicationsLoading: false,
+    applicationsError: null,
+
+    jobsLoading: false,
+  });
+});
