@@ -5,6 +5,7 @@ import {
   Compass,
   Heart,
   Layers3,
+  LockKeyhole,
   ShieldCheck,
   Sparkles,
   Users,
@@ -12,30 +13,22 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const values = [
+const capabilities = [
   {
-    title: "Clarity",
-    description:
-      "Keep job discovery, applications, and hiring decisions easy to understand at every step.",
-    icon: Compass,
+    label: "Job discovery",
+    description: "Search opportunities by keyword, category, and location.",
+    icon: Layers3,
   },
   {
-    title: "Transparency",
-    description:
-      "Application status and recruiter actions should be visible instead of hidden behind unclear workflows.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Human-first",
-    description:
-      "Design the experience around candidates and recruiters rather than making users adapt to the software.",
-    icon: Heart,
-  },
-  {
-    title: "Connected",
-    description:
-      "Bring candidates, opportunities, applications, and hiring workflows together in one platform.",
+    label: "Candidate workflow",
+    description: "Maintain profiles, upload resumes, and submit applications.",
     icon: Users,
+  },
+  {
+    label: "Recruiter workspace",
+    description:
+      "Publish jobs, review applicants, and manage application status.",
+    icon: Workflow,
   },
 ];
 
@@ -62,16 +55,57 @@ const workflow = [
   },
 ];
 
+const values = [
+  {
+    title: "Clarity",
+    description:
+      "Keep job discovery, applications, and hiring decisions easy to understand at every step.",
+    icon: Compass,
+  },
+  {
+    title: "Transparency",
+    description:
+      "Application status and recruiter actions should remain visible instead of hidden behind unclear workflows.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Human-first",
+    description:
+      "Design the experience around candidates and recruiters rather than making users adapt to the software.",
+    icon: Heart,
+  },
+  {
+    title: "Connected",
+    description:
+      "Bring candidates, opportunities, applications, and hiring workflows together in one platform.",
+    icon: Users,
+  },
+];
+
+const securityFeatures = [
+  "JWT authentication",
+  "Role-based authorization",
+  "Protected recruiter workflows",
+  "Protected resume access",
+];
+
 export default function AboutUs() {
   return (
     <div className="relative overflow-hidden">
-      {/* Background atmosphere */}
+      {/* =========================================================
+          BACKGROUND ATMOSPHERE
+      ========================================================== */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-1/2 top-0 h-[520px] w-[720px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[140px]" />
+
         <div className="absolute right-0 top-[620px] h-[420px] w-[420px] rounded-full bg-cyan-500/5 blur-[120px]" />
+
+        <div className="absolute bottom-[500px] left-0 h-[320px] w-[320px] rounded-full bg-indigo-500/[0.04] blur-[120px]" />
       </div>
 
-      {/* Hero */}
+      {/* =========================================================
+          HERO
+      ========================================================== */}
       <section className="section relative">
         <div className="site-container">
           <div className="mx-auto max-w-4xl text-center">
@@ -80,15 +114,15 @@ export default function AboutUs() {
               About JobPortal
             </div>
 
-            <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 text-4xl font-bold tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
               A simpler way to connect{" "}
               <span className="gradient-text">talent and opportunity.</span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-              JobPortal is a full-stack recruitment platform designed to make
-              job discovery, applications, and recruiter workflows feel
-              straightforward and connected.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-500 sm:text-lg">
+              JobPortal is a full-stack MERN recruitment platform designed to
+              bring job discovery, applications, and recruiter workflows into
+              one focused experience.
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -105,11 +139,14 @@ export default function AboutUs() {
                 className="btn-secondary inline-flex items-center justify-center gap-2"
               >
                 Get in touch
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
 
-          {/* Product visual */}
+          {/* =====================================================
+              PRODUCT VISUAL
+          ====================================================== */}
           <div className="mx-auto mt-16 max-w-6xl">
             <div className="glass relative overflow-hidden rounded-3xl p-2 shadow-2xl shadow-violet-950/20">
               <div className="rounded-[22px] border border-white/[0.06] bg-[#091525] p-5 sm:p-7">
@@ -123,57 +160,41 @@ export default function AboutUs() {
                       <p className="text-sm font-semibold text-white">
                         Hiring workspace
                       </p>
+
                       <p className="text-xs text-slate-500">
-                        One connected workflow
+                        Connected candidate and recruiter workflows
                       </p>
                     </div>
                   </div>
 
-                  <span className="hidden rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300 sm:block">
-                    System ready
-                  </span>
+                  <div className="hidden items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.025] px-3 py-1.5 sm:flex">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <span className="text-xs font-medium text-slate-400">
+                      Role-aware
+                    </span>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 pt-5 md:grid-cols-3">
-                  {[
-                    {
-                      label: "Discover",
-                      value: "Browse jobs",
-                      icon: Layers3,
-                    },
-                    {
-                      label: "Connect",
-                      value: "Submit application",
-                      icon: Users,
-                    },
-                    {
-                      label: "Manage",
-                      value: "Track progress",
-                      icon: CheckCircle2,
-                    },
-                  ].map((item) => {
+                  {capabilities.map((item) => {
                     const Icon = item.icon;
 
                     return (
                       <div
                         key={item.label}
-                        className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5"
+                        className="group rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/20 hover:bg-white/[0.04]"
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
-                            {item.label}
-                          </span>
-
-                          <Icon className="h-4 w-4 text-violet-400" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-300 transition-colors group-hover:bg-violet-500/15">
+                          <Icon className="h-4.5 w-4.5" />
                         </div>
 
-                        <p className="mt-6 text-base font-semibold text-white">
-                          {item.value}
+                        <p className="mt-5 text-sm font-semibold text-white">
+                          {item.label}
                         </p>
 
-                        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-800">
-                          <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" />
-                        </div>
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          {item.description}
+                        </p>
                       </div>
                     );
                   })}
@@ -184,7 +205,9 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* Story */}
+      {/* =========================================================
+          APPROACH
+      ========================================================== */}
       <section className="section border-t border-white/[0.04]">
         <div className="site-container">
           <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
@@ -202,7 +225,7 @@ export default function AboutUs() {
                 JobPortal brings the candidate and recruiter sides of the hiring
                 process into a single application. Candidates can discover
                 relevant roles, maintain their profile, submit applications, and
-                monitor their progress.
+                monitor their application progress.
               </p>
 
               <p className="mt-4 leading-7 text-slate-400">
@@ -234,6 +257,7 @@ export default function AboutUs() {
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-violet-400">
                     Platform flow
                   </p>
+
                   <h3 className="mt-2 text-xl font-semibold text-white">
                     From discovery to decision
                   </h3>
@@ -262,6 +286,7 @@ export default function AboutUs() {
                           <span className="text-[10px] font-bold tracking-[0.16em] text-slate-600">
                             {item.number}
                           </span>
+
                           <h4 className="text-sm font-semibold text-white">
                             {item.title}
                           </h4>
@@ -280,7 +305,54 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* Values */}
+      {/* =========================================================
+          SECURITY
+      ========================================================== */}
+      <section className="section border-t border-white/[0.04]">
+        <div className="site-container">
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+            <div className="glass rounded-3xl p-7 sm:p-8">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
+                <LockKeyhole className="h-5 w-5" />
+              </div>
+
+              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">
+                Built with protection in mind
+              </p>
+
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                Access follows the user&apos;s role.
+              </h2>
+
+              <p className="mt-4 text-sm leading-7 text-slate-500">
+                Authentication and authorization are part of the application
+                architecture rather than being treated as a visual layer.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {securityFeatures.map((feature) => (
+                <div
+                  key={feature}
+                  className="glass flex items-center gap-4 rounded-2xl p-5 transition-all duration-300 hover:border-cyan-400/15"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+
+                  <p className="text-sm font-medium text-slate-300">
+                    {feature}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          VALUES
+      ========================================================== */}
       <section className="section border-t border-white/[0.04]">
         <div className="site-container">
           <div className="mx-auto max-w-2xl text-center">
@@ -294,8 +366,8 @@ export default function AboutUs() {
             </h2>
 
             <p className="mt-4 text-sm leading-7 text-slate-500 sm:text-base">
-              The interface is only one part of the experience. The workflow
-              should remain predictable, transparent, and useful.
+              The interface is only one part of the experience. The underlying
+              workflow should remain predictable, transparent, and useful.
             </p>
           </div>
 
@@ -326,7 +398,9 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* =========================================================
+          CTA
+      ========================================================== */}
       <section className="section">
         <div className="site-container">
           <div className="relative overflow-hidden rounded-3xl border border-violet-400/10 bg-gradient-to-br from-violet-500/[0.12] via-white/[0.025] to-cyan-400/[0.06] p-8 sm:p-12">
@@ -343,8 +417,8 @@ export default function AboutUs() {
                 </h2>
 
                 <p className="mt-3 text-sm leading-6 text-slate-400">
-                  Explore the available roles or create an account to start
-                  using the platform.
+                  Explore available roles or create an account to start using
+                  the candidate and recruiter workflows.
                 </p>
               </div>
 
