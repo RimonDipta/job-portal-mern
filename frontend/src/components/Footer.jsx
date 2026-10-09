@@ -160,7 +160,7 @@ export default function Footer() {
         ========================================================== */}
         <div className="mt-12 flex flex-col gap-4 border-t border-white/[0.05] pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[11px] text-slate-700">
-            © {currentYear} JobPortal. Built with React, Node.js, Express &
+            Â© {currentYear} JobPortal. Built with React, Node.js, Express &
             MongoDB.
           </p>
 

@@ -185,7 +185,7 @@ export default function AboutUs() {
                         className="group rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/20 hover:bg-white/[0.04]"
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-300 transition-colors group-hover:bg-violet-500/15">
-                          <Icon className="h-4.5 w-4.5" />
+                          <Icon className="h-[18px] w-[18px]" />
                         </div>
 
                         <p className="mt-5 text-sm font-semibold text-white">

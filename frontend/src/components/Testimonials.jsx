@@ -117,7 +117,7 @@ export default function Testimonials() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
-                <ShieldCheck className="h-4.5 w-4.5" />
+                <ShieldCheck className="h-[18px] w-[18px]" />
               </div>
 
               <div>

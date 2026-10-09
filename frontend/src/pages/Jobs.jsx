@@ -216,7 +216,7 @@ export default function Jobs() {
             >
               <div className="grid gap-2 lg:grid-cols-[1.3fr_1fr_auto]">
                 <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#091525]/80 px-4 py-3.5 transition-colors focus-within:border-violet-400/30">
-                  <Search className="h-4.5 w-4.5 shrink-0 text-violet-400" />
+                  <Search className="h-[18px] w-[18px] shrink-0 text-violet-400" />
 
                   <input
                     type="text"
@@ -228,7 +228,7 @@ export default function Jobs() {
                 </div>
 
                 <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#091525]/80 px-4 py-3.5 transition-colors focus-within:border-violet-400/30">
-                  <MapPin className="h-4.5 w-4.5 shrink-0 text-cyan-400" />
+                  <MapPin className="h-[18px] w-[18px] shrink-0 text-cyan-400" />
 
                   <input
                     type="text"

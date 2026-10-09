@@ -28,12 +28,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 const BACKEND_URL = API_URL.replace(/\/api\/v1\/?$/, "");
 
 const formatDate = (value) => {
-  if (!value) return "—";
+  if (!value) return "â€”";
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return "â€”";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -1064,7 +1064,7 @@ export default function Dashboard() {
                     required
                     value={salary}
                     onChange={(event) => setSalary(event.target.value)}
-                    placeholder="$80k – $120k"
+                    placeholder="$80k â€“ $120k"
                     className="focus-ring w-full rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-violet-400/40"
                   />
                 </div>

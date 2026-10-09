@@ -58,7 +58,7 @@ export default function Hero() {
       <div className="site-container">
         <div className="grid min-h-[680px] items-center gap-10 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-4 lg:py-20">
           {/* =========================================================
-              LEFT — HERO CONTENT
+              LEFT â€” HERO CONTENT
           ========================================================== */}
           <div className="relative z-10 max-w-2xl">
             <div className="section-eyebrow mb-6 w-fit">
@@ -200,7 +200,7 @@ export default function Hero() {
           </div>
 
           {/* =========================================================
-              RIGHT — GENERATED HERO ART
+              RIGHT â€” GENERATED HERO ART
           ========================================================== */}
           <div className="relative flex min-h-[420px] items-center justify-center lg:min-h-[620px]">
             {/* Glow behind artwork */}

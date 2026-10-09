@@ -30,12 +30,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 const BACKEND_URL = API_URL.replace(/\/api\/v1\/?$/, "");
 
 const formatDate = (value) => {
-  if (!value) return "—";
+  if (!value) return "â€”";
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return "â€”";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -576,7 +576,7 @@ export default function Profile() {
                           onClick={openEditModal}
                           className="mt-4 text-sm font-semibold text-violet-300 hover:text-violet-200"
                         >
-                          Add summary →
+                          Add summary â†’
                         </button>
                       </div>
                     </div>
@@ -618,7 +618,7 @@ export default function Profile() {
                       onClick={openEditModal}
                       className="mt-4 text-sm font-semibold text-violet-300 hover:text-violet-200"
                     >
-                      Add your skills →
+                      Add your skills â†’
                     </button>
                   </div>
                 )}

@@ -47,7 +47,7 @@ export default function Stats() {
                 className="group flex items-center gap-3 px-4 py-4 first:pl-0 last:pr-0 sm:gap-4 sm:px-6"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-400/10 bg-violet-400/[0.06] text-violet-300 transition-all duration-300 group-hover:border-violet-400/20 group-hover:bg-violet-400/[0.1]">
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className="h-[18px] w-[18px]" />
                 </div>
 
                 <div className="min-w-0">

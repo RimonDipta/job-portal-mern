@@ -89,7 +89,7 @@ export default function ContactUs() {
         <div className="site-container">
           <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
             {/* =====================================================
-                LEFT — INFORMATION
+                LEFT â€” INFORMATION
             ====================================================== */}
             <aside className="space-y-4">
               {/* Project information */}
@@ -170,7 +170,7 @@ export default function ContactUs() {
             </aside>
 
             {/* =====================================================
-                RIGHT — FORM
+                RIGHT â€” FORM
             ====================================================== */}
             <div className="glass rounded-3xl p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
