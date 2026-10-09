@@ -1,93 +1,130 @@
 import React from "react";
+import {
+  ArrowUpRight,
+  BriefcaseBusiness,
+  Github,
+  Layers3,
+  ShieldCheck,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Mail, ArrowUpRight, MapPin } from "lucide-react";
+
+const categories = [
+  {
+    label: "Frontend Engineering",
+    query: "Frontend",
+  },
+  {
+    label: "Backend Engineering",
+    query: "Backend",
+  },
+  {
+    label: "UI / UX Design",
+    query: "Design",
+  },
+  {
+    label: "Full Stack Development",
+    query: "Full Stack",
+  },
+];
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/[0.07] bg-[#050c17]">
+    <footer className="border-t border-white/[0.05] bg-[#050c18]">
       <div className="site-container py-14">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="inline-flex" aria-label="JobPortal home">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_0.8fr_0.8fr]">
+          {/* =========================================================
+              BRAND
+          ========================================================== */}
+          <div className="max-w-md">
+            <Link to="/" className="group inline-flex items-center gap-2.5">
               <img
-                src="/brand/logo.svg"
-                alt="JobPortal"
-                className="h-10 w-auto"
+                src="/brand/logo-mark.svg"
+                alt=""
+                className="h-9 w-9 transition-transform duration-300 group-hover:scale-105"
               />
+
+              <span className="text-sm font-bold tracking-[0.16em] text-white">
+                JOB
+                <span className="text-violet-400">PORTAL</span>
+              </span>
             </Link>
 
-            <p className="mt-5 max-w-md text-sm leading-7 text-slate-500">
-              A modern recruitment platform connecting candidates with
-              opportunities and helping recruiters build better teams.
+            <p className="mt-5 text-sm leading-7 text-slate-600">
+              A focused MERN job marketplace connecting candidates with
+              recruiters through a simple, role-aware hiring workflow.
             </p>
 
-            <div className="mt-6 flex items-center gap-3">
-              <a
-                href="https://github.com/"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="GitHub"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
-              >
-                <Github className="h-4 w-4" />
-              </a>
+            <div className="mt-6 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-slate-500">
+                <Layers3 className="h-3 w-3 text-violet-300" />
+                MERN
+              </span>
 
-              <a
-                href="https://linkedin.com/"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="LinkedIn"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
-              >
-                <Linkedin className="h-4 w-4" />
-              </a>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-slate-500">
+                <ShieldCheck className="h-3 w-3 text-cyan-300" />
+                Protected workflows
+              </span>
 
-              <a
-                href="mailto:support@jobportal.com"
-                aria-label="Email"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-slate-500">
+                <BriefcaseBusiness className="h-3 w-3 text-violet-300" />
+                Candidate + recruiter
+              </span>
             </div>
+
+            <a
+              href="https://github.com/RimonDipta/job-portal-mern"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-7 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 transition-colors hover:text-white"
+            >
+              <Github className="h-4 w-4" />
+              View source on GitHub
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
           </div>
 
-          {/* Platform */}
+          {/* =========================================================
+              PLATFORM
+          ========================================================== */}
           <div>
-            <h3 className="text-sm font-semibold text-white">Platform</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">
+              Platform
+            </h3>
 
-            <ul className="mt-5 space-y-3 text-sm text-slate-500">
+            <ul className="mt-5 space-y-3">
               <li>
-                <Link to="/jobs" className="transition-colors hover:text-white">
-                  Find Jobs
+                <Link
+                  to="/"
+                  className="text-sm text-slate-600 transition-colors hover:text-violet-300"
+                >
+                  Home
                 </Link>
               </li>
 
               <li>
                 <Link
-                  to="/register"
-                  className="transition-colors hover:text-white"
+                  to="/jobs"
+                  className="text-sm text-slate-600 transition-colors hover:text-violet-300"
                 >
-                  Create Account
+                  Browse jobs
                 </Link>
               </li>
 
               <li>
                 <Link
                   to="/about"
-                  className="transition-colors hover:text-white"
+                  className="text-sm text-slate-600 transition-colors hover:text-violet-300"
                 >
-                  About Us
+                  About the platform
                 </Link>
               </li>
 
               <li>
                 <Link
                   to="/contact"
-                  className="transition-colors hover:text-white"
+                  className="text-sm text-slate-600 transition-colors hover:text-violet-300"
                 >
                   Contact
                 </Link>
@@ -95,34 +132,62 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* =========================================================
+              CATEGORIES
+          ========================================================== */}
           <div>
-            <h3 className="text-sm font-semibold text-white">Contact</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">
+              Explore
+            </h3>
 
-            <ul className="mt-5 space-y-4 text-sm text-slate-500">
-              <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
-
-                <span>Dhaka, Bangladesh</span>
-              </li>
-
-              <li>
-                <a
-                  href="mailto:support@jobportal.com"
-                  className="inline-flex items-center gap-2 transition-colors hover:text-white"
-                >
-                  support@jobportal.com
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </a>
-              </li>
+            <ul className="mt-5 space-y-3">
+              {categories.map((category) => (
+                <li key={category.query}>
+                  <Link
+                    to={`/jobs?category=${encodeURIComponent(category.query)}`}
+                    className="text-sm text-slate-600 transition-colors hover:text-violet-300"
+                  >
+                    {category.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/[0.07] pt-6 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {currentYear} JobPortal. All rights reserved.</p>
+        {/* =========================================================
+            BOTTOM BAR
+        ========================================================== */}
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/[0.05] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[11px] text-slate-700">
+            © {currentYear} JobPortal. Built with React, Node.js, Express &
+            MongoDB.
+          </p>
 
-          <p>Built with React, Node.js, Express & MongoDB.</p>
+          <div className="flex items-center gap-5">
+            <Link
+              to="/jobs"
+              className="text-[11px] font-medium text-slate-700 transition-colors hover:text-slate-400"
+            >
+              Browse jobs
+            </Link>
+
+            <Link
+              to="/register"
+              className="text-[11px] font-medium text-slate-700 transition-colors hover:text-slate-400"
+            >
+              Create account
+            </Link>
+
+            <a
+              href="https://github.com/RimonDipta/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-medium text-slate-700 transition-colors hover:text-slate-400"
+            >
+              GitHub
+            </a>
+          </div>
         </div>
       </div>
     </footer>
