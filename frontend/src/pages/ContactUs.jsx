@@ -1,139 +1,299 @@
-import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Github,
+  Linkedin,
+  Mail,
+  MessageSquare,
+  Send,
+  Sparkles,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+
+const inputClassName =
+  "w-full rounded-xl border border-white/[0.08] bg-[#091525]/80 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-500/10";
 
 export default function ContactUs() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (name && email && message) {
-      setSubmitted(true);
-      setName('');
-      setEmail('');
-      setMessage('');
-      setTimeout(() => setSubmitted(false), 5000);
+  useEffect(() => {
+    if (!submitted) {
+      return undefined;
     }
+
+    const timer = window.setTimeout(() => {
+      setSubmitted(false);
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [submitted]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      return;
+    }
+
+    setSubmitted(true);
+    setName("");
+    setEmail("");
+    setMessage("");
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 py-20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6">Contact Our Team</h1>
-          <p className="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
-            Have questions about candidates, recruiter account verification, or system features? Send us a message and we'll reply shortly.
-          </p>
-        </div>
+    <div className="relative overflow-hidden">
+      {/* Background atmosphere */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-1/3 top-0 h-[480px] w-[620px] rounded-full bg-violet-600/10 blur-[150px]" />
+        <div className="absolute -right-20 top-[600px] h-[360px] w-[360px] rounded-full bg-cyan-400/5 blur-[120px]" />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Info cards */}
-          <div className="space-y-6">
-            <div className="bg-slate-850/30 glass border border-slate-800 p-6 rounded-2xl flex items-start gap-4">
-              <div className="p-3 bg-violet-950 rounded-xl text-violet-400 border border-violet-900/30 shrink-0">
-                <Mail className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-white font-bold text-sm">Email Address</h4>
-                <p className="text-xs text-slate-400 mt-1">Our support queue is open 24/7.</p>
-                <a href="mailto:support@jobportal.com" className="text-sm font-semibold text-violet-400 hover:text-violet-300 block mt-2">
+      {/* Hero */}
+      <section className="section pb-10">
+        <div className="site-container">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="section-eyebrow mx-auto w-fit">
+              <MessageSquare className="h-3.5 w-3.5" />
+              Contact
+            </div>
+
+            <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Let&apos;s start a{" "}
+              <span className="gradient-text">conversation.</span>
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
+              Have a question about the platform, the candidate experience, or
+              recruiter workflows? Send a message through the form below.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Main content */}
+      <section className="section pt-8">
+        <div className="site-container">
+          <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+            {/* Contact information */}
+            <aside className="space-y-4">
+              <div className="glass rounded-3xl p-6 sm:p-7">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 text-violet-300">
+                  <Mail className="h-5 w-5" />
+                </div>
+
+                <h2 className="mt-5 text-lg font-semibold text-white">Email</h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  For general questions about the project or platform.
+                </p>
+
+                <a
+                  href="mailto:support@jobportal.com"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-violet-300 transition-colors hover:text-violet-200"
+                >
                   support@jobportal.com
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
-            </div>
 
-            <div className="bg-slate-850/30 glass border border-slate-800 p-6 rounded-2xl flex items-start gap-4">
-              <div className="p-3 bg-violet-950 rounded-xl text-violet-400 border border-violet-900/30 shrink-0">
-                <Phone className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-white font-bold text-sm">Phone Number</h4>
-                <p className="text-xs text-slate-400 mt-1">Mon-Fri from 9am to 6pm PST.</p>
-                <span className="text-sm font-semibold text-white block mt-2">
-                  +1 (555) 019-2834
-                </span>
-              </div>
-            </div>
+              <div className="glass rounded-3xl p-6 sm:p-7">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
 
-            <div className="bg-slate-850/30 glass border border-slate-800 p-6 rounded-2xl flex items-start gap-4">
-              <div className="p-3 bg-violet-950 rounded-xl text-violet-400 border border-violet-900/30 shrink-0">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-white font-bold text-sm">Office Address</h4>
-                <p className="text-xs text-slate-400 mt-1">Headquarters and lab location.</p>
-                <span className="text-sm font-semibold text-slate-350 block mt-2 leading-relaxed">
-                  123 Innovation Way, Suite 400,<br />Tech City, TC 94016
-                </span>
-              </div>
-            </div>
-          </div>
+                <h2 className="mt-5 text-lg font-semibold text-white">
+                  Platform questions
+                </h2>
 
-          {/* Contact form */}
-          <div className="md:col-span-2">
-            <div className="bg-slate-850/40 glass border border-slate-800 p-8 rounded-3xl">
-              <h2 className="text-xl font-bold text-white mb-6">Send Us a Message</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Ask about job discovery, applications, recruiter tools, or
+                  account workflows.
+                </p>
+
+                <Link
+                  to="/jobs"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+                >
+                  Explore the platform
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+
+              <div className="glass rounded-3xl p-6 sm:p-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Project links
+                </p>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <a
+                    href="https://github.com/RimonDipta/job-portal-mern"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white"
+                  >
+                    <Github className="h-4 w-4" />
+                    GitHub
+                  </a>
+
+                  <a
+                    href="https://www.linkedin.com/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white"
+                  >
+                    <Linkedin className="h-4 w-4" />
+                    LinkedIn
+                  </a>
+                </div>
+              </div>
+            </aside>
+
+            {/* Form */}
+            <div className="glass rounded-3xl p-6 sm:p-8 lg:p-10">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                <div>
+                  <div className="flex items-center gap-2 text-violet-300">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="text-xs font-semibold uppercase tracking-[0.16em]">
+                      Send a message
+                    </span>
+                  </div>
+
+                  <h2 className="mt-3 text-2xl font-bold text-white">
+                    How can we help?
+                  </h2>
+
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                    Fill out the form with enough context for us to understand
+                    your question.
+                  </p>
+                </div>
+
+                <div className="hidden h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.025] text-slate-500 sm:flex">
+                  <Send className="h-5 w-5" />
+                </div>
+              </div>
 
               {submitted && (
-                <div className="mb-6 p-4 rounded-xl bg-emerald-950/40 border border-emerald-900/30 text-emerald-400 text-sm flex items-center gap-2.5 font-medium">
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
-                  <span>Your message has been sent successfully! Our agents will contact you soon.</span>
+                <div className="mt-7 flex items-start gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.06] p-4">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-200">
+                      Message submitted
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-emerald-300/70">
+                      The form submission was captured successfully in this demo
+                      interface.
+                    </p>
+                  </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
-                    className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 placeholder:text-slate-500"
-                  />
+              <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="contact-name"
+                      className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+                    >
+                      Name
+                    </label>
+
+                    <input
+                      id="contact-name"
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      placeholder="Your name"
+                      className={inputClassName}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="contact-email"
+                      className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+                    >
+                      Email
+                    </label>
+
+                    <input
+                      id="contact-email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="name@example.com"
+                      className={inputClassName}
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@example.com"
-                    className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 placeholder:text-slate-500"
-                  />
-                </div>
+                  <label
+                    htmlFor="contact-message"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+                  >
+                    Message
+                  </label>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Message</label>
                   <textarea
-                    rows="5"
+                    id="contact-message"
+                    rows={7}
                     required
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Explain your inquiry in detail..."
-                    className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 placeholder:text-slate-500"
-                  ></textarea>
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="Tell us what you would like to know..."
+                    className={`${inputClassName} resize-y`}
+                  />
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-violet-600/20"
-                >
-                  <Send className="h-4.5 w-4.5" />
-                  Send Message
-                </button>
+                <div className="flex flex-col gap-4 border-t border-white/[0.06] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs leading-5 text-slate-600">
+                    This form currently demonstrates the frontend interaction
+                    and does not send data to a backend service.
+                  </p>
+
+                  <button
+                    type="submit"
+                    className="btn-primary inline-flex shrink-0 items-center justify-center gap-2"
+                  >
+                    Send message
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         </div>
+      </section>
 
-      </div>
+      {/* Bottom CTA */}
+      <section className="section pt-10">
+        <div className="site-container">
+          <div className="rounded-3xl border border-white/[0.05] bg-white/[0.02] p-7 text-center sm:p-10">
+            <p className="text-sm text-slate-500">
+              Looking for your next opportunity instead?
+            </p>
+
+            <Link
+              to="/jobs"
+              className="mt-3 inline-flex items-center gap-2 text-lg font-semibold text-white transition-colors hover:text-violet-300"
+            >
+              Browse available jobs
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
