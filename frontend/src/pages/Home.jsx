@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ArrowRight, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import Hero from "../components/Hero";
@@ -11,6 +11,27 @@ import JobCard from "../components/JobCard";
 
 import { useAppStore } from "../store/useAppStore";
 
+function JobSkeleton() {
+  return (
+    <div className="glass animate-pulse rounded-2xl p-6">
+      <div className="flex items-start justify-between">
+        <div className="h-11 w-11 rounded-xl bg-white/[0.06]" />
+        <div className="h-6 w-20 rounded-full bg-white/[0.04]" />
+      </div>
+
+      <div className="mt-6 h-5 w-3/4 rounded bg-white/[0.06]" />
+      <div className="mt-3 h-3 w-1/3 rounded bg-white/[0.04]" />
+
+      <div className="mt-5 space-y-2">
+        <div className="h-3 w-full rounded bg-white/[0.04]" />
+        <div className="h-3 w-5/6 rounded bg-white/[0.04]" />
+      </div>
+
+      <div className="mt-6 h-10 rounded-xl bg-white/[0.04]" />
+    </div>
+  );
+}
+
 export default function Home() {
   const { jobs, fetchJobs, jobsLoading, jobsError } = useAppStore();
 
@@ -20,8 +41,18 @@ export default function Home() {
 
   const latestJobs = jobs.slice(0, 3);
 
+  const handleRetry = () => {
+    fetchJobs();
+  };
+
   return (
-    <div>
+    <div className="relative overflow-hidden">
+      {/* Global homepage atmosphere */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-violet-600/[0.07] blur-[160px]" />
+        <div className="absolute right-0 top-[1000px] h-[450px] w-[450px] rounded-full bg-cyan-400/[0.035] blur-[140px]" />
+      </div>
+
       {/* Hero */}
       <Hero />
 
@@ -32,120 +63,140 @@ export default function Home() {
       <PopularCategories />
 
       {/* Latest jobs */}
-      <section className="section border-b border-white/[0.06]">
+      <section className="section border-b border-white/[0.04]">
         <div className="site-container">
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-            <div>
-              <span className="section-eyebrow">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <div className="section-eyebrow w-fit">
                 <Sparkles className="h-3.5 w-3.5" />
-                Fresh opportunities
-              </span>
+                Latest opportunities
+              </div>
 
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                Latest openings.
+              <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                Roles worth a closer look.
               </h2>
 
-              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
-                Explore the latest positions added to the platform and find your
-                next opportunity.
+              <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
+                Review the latest job postings and open any opportunity for its
+                full description, requirements, and application workflow.
               </p>
             </div>
 
             <Link
               to="/jobs"
-              className="group inline-flex items-center gap-2 text-sm font-semibold text-violet-300 transition-colors hover:text-violet-200"
+              className="group inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-violet-300 transition-colors hover:text-violet-200"
             >
-              View all jobs
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              Browse all jobs
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </div>
 
-          <div className="mt-10">
-            {jobsLoading ? (
-              <div className="grid gap-4 md:grid-cols-3">
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="h-[330px] animate-pulse rounded-2xl border border-white/[0.06] bg-white/[0.025]"
-                  />
-                ))}
-              </div>
-            ) : jobsError ? (
-              <div className="rounded-2xl border border-rose-400/10 bg-rose-400/[0.04] p-8 text-center">
-                <p className="text-sm font-medium text-rose-300">
-                  Unable to load job openings.
-                </p>
+          {/* Loading */}
+          {jobsLoading && (
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              <JobSkeleton />
+              <JobSkeleton />
+              <JobSkeleton />
+            </div>
+          )}
 
-                <p className="mt-2 text-xs text-slate-600">{jobsError}</p>
+          {/* Error */}
+          {!jobsLoading && jobsError && (
+            <div className="mt-10 rounded-3xl border border-rose-400/15 bg-rose-400/[0.04] p-7">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-rose-200">
+                    We couldn&apos;t load the latest opportunities.
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-rose-300/60">
+                    {jobsError}
+                  </p>
+                </div>
 
                 <button
                   type="button"
-                  onClick={() => fetchJobs()}
-                  className="btn-secondary mt-5"
+                  onClick={handleRetry}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-rose-400/15 bg-rose-400/[0.05] px-4 py-2.5 text-xs font-semibold text-rose-200 transition-colors hover:bg-rose-400/[0.1]"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RotateCcw className="h-3.5 w-3.5" />
                   Try again
                 </button>
               </div>
-            ) : latestJobs.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {latestJobs.map((job) => (
-                  <JobCard key={job._id} job={job} />
-                ))}
-              </div>
-            ) : (
-              <div className="glass rounded-2xl p-10 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-400/[0.07] text-violet-300">
-                  <Sparkles className="h-5 w-5" />
-                </div>
+            </div>
+          )}
 
-                <h3 className="mt-5 text-base font-semibold text-white">
-                  No openings yet
-                </h3>
+          {/* Jobs */}
+          {!jobsLoading && !jobsError && latestJobs.length > 0 && (
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {latestJobs.map((job) => (
+                <JobCard key={job._id} job={job} />
+              ))}
+            </div>
+          )}
 
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                  New opportunities will appear here when recruiters publish
-                  them.
-                </p>
+          {/* Empty */}
+          {!jobsLoading && !jobsError && latestJobs.length === 0 && (
+            <div className="mt-10 rounded-3xl border border-white/[0.06] bg-white/[0.02] px-6 py-16 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.025] text-violet-300">
+                <BriefcaseEmptyIcon />
               </div>
-            )}
-          </div>
+
+              <h3 className="mt-5 text-lg font-semibold text-white">
+                No opportunities yet
+              </h3>
+
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+                There are currently no published jobs. Check back after a
+                recruiter posts a new opportunity.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Existing supporting sections */}
+      {/* Platform advantages */}
       <WhyChooseUs />
 
+      {/* Candidate / recruiter experiences */}
       <Testimonials />
 
       {/* Final CTA */}
       <section className="section">
         <div className="site-container">
-          <div className="relative overflow-hidden rounded-[30px] border border-violet-400/10 bg-gradient-to-br from-violet-500/[0.10] via-white/[0.025] to-cyan-400/[0.06] px-6 py-14 text-center sm:px-12 lg:py-20">
-            <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="relative overflow-hidden rounded-3xl border border-violet-400/10 bg-gradient-to-br from-violet-500/[0.1] via-white/[0.02] to-cyan-400/[0.04] p-8 sm:p-12">
+            <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
 
-            <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
+            <div className="relative flex flex-col gap-7 md:flex-row md:items-center md:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-300">
+                  Your next move
+                </p>
 
-            <div className="relative">
-              <span className="section-eyebrow">Ready when you are</span>
+                <h2 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                  Ready to explore what&apos;s available?
+                </h2>
 
-              <h2 className="mx-auto mt-2 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                Your next chapter could start with one search.
-              </h2>
+                <p className="mt-3 text-sm leading-6 text-slate-500">
+                  Search the marketplace or create an account to start using the
+                  candidate and recruiter workflows.
+                </p>
+              </div>
 
-              <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-slate-500 sm:text-base">
-                Create your profile, discover opportunities, and start building
-                the career you want.
-              </p>
-
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link to="/jobs" className="btn-primary">
-                  Explore jobs
+              <div className="relative flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to="/jobs"
+                  className="btn-primary inline-flex items-center justify-center gap-2"
+                >
+                  Browse jobs
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 
-                <Link to="/register" className="btn-secondary">
-                  Create an account
+                <Link
+                  to="/register"
+                  className="btn-secondary inline-flex items-center justify-center gap-2"
+                >
+                  Create account
                 </Link>
               </div>
             </div>
@@ -153,5 +204,23 @@ export default function Home() {
         </div>
       </section>
     </div>
+  );
+}
+
+function BriefcaseEmptyIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M3 12h18" />
+      <path d="M10 12v2h4v-2" />
+    </svg>
   );
 }
