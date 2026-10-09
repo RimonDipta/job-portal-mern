@@ -1,48 +1,167 @@
-import React from 'react';
-import { Target, Award, ShieldCheck, Zap } from 'lucide-react';
+import React from "react";
+import {
+  ArrowUpRight,
+  CheckCircle2,
+  FileSearch,
+  LockKeyhole,
+  Search,
+  UserRoundCheck,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+
+const features = [
+  {
+    number: "01",
+    title: "Focused job discovery",
+    description:
+      "Search opportunities using keywords, categories, and locations without navigating through unnecessary steps.",
+    icon: Search,
+  },
+  {
+    number: "02",
+    title: "Application tracking",
+    description:
+      "Candidates can review submitted applications and see the status assigned by recruiters.",
+    icon: CheckCircle2,
+  },
+  {
+    number: "03",
+    title: "Recruiter workspace",
+    description:
+      "Recruiters can publish jobs, edit listings, review applicants, and manage application decisions.",
+    icon: UserRoundCheck,
+  },
+  {
+    number: "04",
+    title: "Protected workflows",
+    description:
+      "Authentication and role-based authorization keep candidate and recruiter capabilities separated.",
+    icon: LockKeyhole,
+  },
+];
 
 export default function WhyChooseUs() {
-  const points = [
-    { title: 'Tailored Matchmaking', desc: 'Our search processes align your unique skills and locations with the precise requirements of employers.', icon: Target, bg: 'bg-violet-950/40 text-violet-400' },
-    { title: 'Instant Application', desc: 'Apply with just a single click. Keep your professional profile updated and apply instantly to any position.', icon: Zap, bg: 'bg-amber-950/40 text-amber-400' },
-    { title: 'Verified Positions Only', desc: 'No spam or ghost jobs. We verify every recruiter account to ensure you are connecting with legitimate employers.', icon: ShieldCheck, bg: 'bg-emerald-950/40 text-emerald-400' },
-    { title: 'Track Applications Live', desc: 'Know exactly where your applications stand. Track status changes in real-time as recruiters process candidates.', icon: Award, bg: 'bg-blue-950/40 text-blue-400' },
-  ];
-
   return (
-    <div className="bg-slate-900 py-20 border-b border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
-              Why Professionals Choose <br />
-              <span className="text-violet-400">Our Job Portal</span>
+    <section className="section border-t border-white/[0.04]">
+      <div className="site-container">
+        <div className="grid items-start gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+          {/* Intro */}
+          <div className="lg:sticky lg:top-28">
+            <div className="section-eyebrow w-fit">
+              <FileSearch className="h-3.5 w-3.5" />
+              Built for the workflow
+            </div>
+
+            <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Less friction.
+              <br />
+              <span className="gradient-text">More focus.</span>
             </h2>
-            <p className="text-slate-400 mb-8 leading-relaxed">
-              We have redesigned the employment matching workflow from scratch. No endless registration loops, no black-box applications, just quick connections with direct feed logs.
+
+            <p className="mt-5 max-w-lg text-sm leading-7 text-slate-500 sm:text-base">
+              JobPortal brings the core recruitment workflow into one focused
+              interface. Candidates get a straightforward application
+              experience, while recruiters get the tools they need to manage
+              their hiring pipeline.
             </p>
-            <div className="bg-slate-850/35 glass p-6 rounded-2xl border border-slate-800 flex items-start gap-4">
-              <span className="text-3xl font-extrabold text-violet-500">98%</span>
-              <div>
-                <h4 className="text-white font-bold mb-1">Satisfactory Job Success Rate</h4>
-                <p className="text-sm text-slate-500 leading-relaxed">Candidates matched via our smart query system report an optimal onboarding experience within the first 30 days.</p>
+
+            <Link
+              to="/jobs"
+              className="group mt-7 inline-flex items-center gap-2 text-sm font-semibold text-violet-300 transition-colors hover:text-violet-200"
+            >
+              Explore available jobs
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </Link>
+
+            {/* Capability strip */}
+            <div className="mt-10 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+                <p className="text-lg font-bold text-white">2</p>
+                <p className="mt-1 text-xs text-slate-600">Platform roles</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+                <p className="text-lg font-bold text-white">MERN</p>
+                <p className="mt-1 text-xs text-slate-600">Application stack</p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {points.map((pt, i) => (
-              <div key={i} className="bg-slate-850/45 glass border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
-                <div className={`p-3 rounded-xl shrink-0 w-fit mb-4 border border-white/5 ${pt.bg}`}>
-                  <pt.icon className="h-5 w-5" />
+          {/* Feature cards */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+
+              return (
+                <div
+                  key={feature.number}
+                  className="glass group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/20"
+                >
+                  <div className="absolute right-5 top-5 text-[10px] font-bold tracking-[0.18em] text-slate-700">
+                    {feature.number}
+                  </div>
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 text-violet-300 transition-all duration-300 group-hover:bg-violet-500/15 group-hover:text-violet-200">
+                    <Icon className="h-5 w-5" />
+                  </div>
+
+                  <h3 className="mt-6 text-base font-semibold text-white">
+                    {feature.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {feature.description}
+                  </p>
+
+                  <div className="mt-6 h-px w-10 bg-gradient-to-r from-violet-400/60 to-transparent transition-all duration-300 group-hover:w-16" />
                 </div>
-                <h3 className="text-white font-bold mb-2 text-md">{pt.title}</h3>
-                <p className="text-slate-400 text-xs md:text-sm leading-relaxed">{pt.desc}</p>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bottom workflow */}
+        <div className="mt-16 overflow-hidden rounded-3xl border border-white/[0.06] bg-[#091525]">
+          <div className="grid md:grid-cols-3">
+            {[
+              {
+                step: "01",
+                title: "Find an opportunity",
+                text: "Browse and filter available roles based on what you are looking for.",
+              },
+              {
+                step: "02",
+                title: "Submit your application",
+                text: "Use your candidate profile and resume to apply to a suitable position.",
+              },
+              {
+                step: "03",
+                title: "Follow the outcome",
+                text: "Review your application history and status as the recruiter processes it.",
+              },
+            ].map((item, index) => (
+              <div
+                key={item.step}
+                className={`relative p-6 sm:p-8 ${
+                  index !== 2 ? "border-b md:border-b-0 md:border-r" : ""
+                } border-white/[0.06]`}
+              >
+                <span className="text-xs font-bold tracking-[0.18em] text-violet-400">
+                  {item.step}
+                </span>
+
+                <h3 className="mt-4 text-base font-semibold text-white">
+                  {item.title}
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  {item.text}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
