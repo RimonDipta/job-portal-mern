@@ -5,7 +5,7 @@ import JobCard from '../components/JobCard';
 import { Search, MapPin, SlidersHorizontal, Trash2 } from 'lucide-react';
 
 export default function Jobs() {
-  const { jobs, fetchJobs, jobsLoading } = useAppStore();
+  const { jobs, fetchJobs, jobsLoading, jobsError } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Local filter states syncing with URL search parameters
@@ -28,6 +28,7 @@ export default function Jobs() {
     const filters = {
       keyword: searchParams.get('keyword') || '',
       category: searchParams.get('category') || '',
+      location: searchParams.get('location') || '',
     };
     fetchJobs(filters);
   }, [searchParams, fetchJobs]);
@@ -145,8 +146,25 @@ export default function Jobs() {
             </div>
 
             {jobsLoading ? (
-              <div className="flex justify-center items-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500"></div>
+              <div className="flex flex-col justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mb-4"></div>
+                <p className="text-sm text-slate-400">Loading available jobs...</p>
+              </div>
+            ) : jobsError ? (
+              <div className="text-center py-20 bg-slate-850/20 glass border border-rose-900/30 rounded-3xl px-6">
+                <p className="text-rose-400 font-semibold text-lg mb-2">Unable to Load Jobs</p>
+                <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">{jobsError}</p>
+                <button
+                  type="button"
+                  onClick={() => fetchJobs({
+                    keyword: searchParams.get('keyword') || '',
+                    category: searchParams.get('category') || '',
+                    location: searchParams.get('location') || '',
+                  })}
+                  className="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+                >
+                  Try Again
+                </button>
               </div>
             ) : filteredJobs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

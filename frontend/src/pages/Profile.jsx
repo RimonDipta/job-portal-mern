@@ -4,7 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { FileText, Code2, Mail, Info, FileUp, Edit2, X, Check, Clock, AlertTriangle, Briefcase } from 'lucide-react';
 
 export default function Profile() {
-  const { user, appliedJobs, fetchAppliedJobs, updateProfile, authLoading, adminJobs, fetchAdminJobs } = useAppStore();
+  const { user, appliedJobs, fetchAppliedJobs, updateProfile, authLoading, adminJobs, fetchAdminJobs, applicationsLoading, applicationsError, jobsLoading, jobsError } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'info';
 
@@ -206,10 +206,29 @@ export default function Profile() {
                   <Briefcase className="h-12 w-12 text-violet-400 mx-auto mb-4" />
                   <h3 className="text-md font-bold text-white mb-2">Recruiting Stats</h3>
                   <div className="space-y-4 mt-4">
-                    <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-                      <span className="text-2xl font-extrabold text-white block">{adminJobs.length}</span>
-                      <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Jobs Posted</span>
-                    </div>
+                    {jobsError ? (
+                      <div className="bg-rose-950/20 p-4 rounded-2xl border border-rose-900/30">
+                        <p className="text-rose-400 text-sm font-semibold mb-2">Unable to load job statistics</p>
+                        <p className="text-slate-500 text-xs mb-3">{jobsError}</p>
+                        <button
+                          type="button"
+                          onClick={() => fetchAdminJobs()}
+                          className="text-violet-400 hover:text-violet-300 text-xs font-semibold"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    ) : jobsLoading ? (
+                      <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                        <div className="animate-pulse h-8 w-12 bg-slate-800 rounded mx-auto mb-2" />
+                        <div className="animate-pulse h-3 w-24 bg-slate-800 rounded mx-auto" />
+                      </div>
+                    ) : (
+                      <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                        <span className="text-2xl font-extrabold text-white block">{adminJobs.length}</span>
+                        <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Jobs Posted</span>
+                      </div>
+                    )}
                     <Link
                       to="/dashboard"
                       className="block bg-violet-600 hover:bg-violet-500 text-white font-semibold py-2.5 px-5 rounded-xl text-sm transition-all text-center font-sans"
@@ -230,7 +249,25 @@ export default function Profile() {
               <h2 className="text-lg font-bold text-white">Applied Job Log</h2>
             </div>
             
-            {appliedJobs.length > 0 ? (
+            {applicationsLoading ? (
+              <div className="flex flex-col justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500 mb-4" />
+                <p className="text-sm text-slate-400">Loading your applications...</p>
+              </div>
+            ) : applicationsError ? (
+              <div className="text-center py-20 px-6">
+                <AlertTriangle className="h-10 w-10 text-rose-500 mx-auto mb-3" />
+                <p className="text-rose-400 font-semibold mb-2">Unable to Load Applications</p>
+                <p className="text-slate-500 text-sm max-w-md mx-auto mb-5">{applicationsError}</p>
+                <button
+                  type="button"
+                  onClick={() => fetchAppliedJobs()}
+                  className="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : appliedJobs.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>

@@ -24,7 +24,9 @@ export default function JobDetail() {
     applicationStatusByJobId,
     user,
     jobsLoading,
+    jobsError,
     applicationsLoading,
+    applicationsError,
   } = useAppStore();
 
   const [applying, setApplying] = useState(false);
@@ -95,6 +97,30 @@ export default function JobDetail() {
     return (
       <div className="min-h-screen bg-slate-900 flex justify-center items-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500" />
+      </div>
+    );
+  }
+
+  if (jobsError && !selectedJob) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col justify-center items-center px-4 text-center">
+        <ShieldAlert className="h-14 w-14 text-rose-500 mb-4" />
+
+        <h2 className="text-2xl font-bold text-white mb-2">
+          Unable to Load Job
+        </h2>
+
+        <p className="text-slate-400 text-sm mb-6 max-w-md">
+          {jobsError}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => fetchJobById(id)}
+          className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -204,6 +230,20 @@ export default function JobDetail() {
               }`}
             >
               {feedback.message}
+            </div>
+          )}
+
+          {applicationsError && user?.role === "candidate" && !userHasApplied && (
+            <div className="mt-4 p-4 rounded-xl border border-amber-900/40 bg-amber-950/20 text-sm">
+              <p className="text-amber-400 font-medium">Unable to check your application status.</p>
+              <p className="text-slate-500 mt-1">{applicationsError}</p>
+              <button
+                type="button"
+                onClick={() => fetchApplicationStatus(id)}
+                className="mt-3 text-violet-400 hover:text-violet-300 font-semibold transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           )}
 

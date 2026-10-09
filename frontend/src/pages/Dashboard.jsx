@@ -15,7 +15,9 @@ export default function Dashboard() {
     fetchApplicants, 
     updateApplicationStatus, 
     jobsLoading, 
-    applicationsLoading 
+    jobsError,
+    applicationsLoading,
+    applicationsError 
   } = useAppStore();
 
   const [activeJobId, setActiveJobId] = useState(null); // When viewing applicants for a job
@@ -249,6 +251,19 @@ export default function Dashboard() {
                     </tbody>
                   </table>
                 </div>
+              ) : applicationsError ? (
+                <div className="text-center py-20 px-6">
+                  <ShieldAlert className="h-10 w-10 text-rose-500 mx-auto mb-3" />
+                  <p className="text-rose-400 font-semibold mb-2">Unable to Load Applicants</p>
+                  <p className="text-slate-500 text-sm max-w-md mx-auto mb-5">{applicationsError}</p>
+                  <button
+                    type="button"
+                    onClick={() => activeJobId && fetchApplicants(activeJobId)}
+                    className="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
               ) : (
                 <div className="text-center py-20">
                   <Users className="h-10 w-10 text-slate-500 mx-auto mb-3" />
@@ -265,8 +280,22 @@ export default function Dashboard() {
             </div>
 
             {jobsLoading ? (
-              <div className="flex justify-center items-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500"></div>
+              <div className="flex flex-col justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mb-4"></div>
+                <p className="text-sm text-slate-400">Loading your job postings...</p>
+              </div>
+            ) : jobsError ? (
+              <div className="text-center py-20 px-6">
+                <ShieldAlert className="h-12 w-12 text-rose-500 mx-auto mb-4" />
+                <p className="text-rose-400 font-semibold text-lg mb-2">Unable to Load Job Posts</p>
+                <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">{jobsError}</p>
+                <button
+                  type="button"
+                  onClick={() => fetchAdminJobs()}
+                  className="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+                >
+                  Try Again
+                </button>
               </div>
             ) : adminJobs.length > 0 ? (
               <div className="overflow-x-auto">
