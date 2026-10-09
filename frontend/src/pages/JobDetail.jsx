@@ -9,12 +9,12 @@ import {
   Clock3,
   FileText,
   MapPin,
+  RefreshCw,
   ShieldCheck,
   Sparkles,
   Users,
   WalletCards,
   XCircle,
-  RefreshCw,
 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -105,9 +105,9 @@ export default function JobDetail() {
   const {
     user,
     token,
-    job,
-    jobLoading,
-    jobError,
+    selectedJob,
+    jobsLoading,
+    jobsError,
     fetchJobById,
     applyForJob,
     applicationStatusByJobId,
@@ -115,7 +115,6 @@ export default function JobDetail() {
     applicationsError,
     fetchAppliedJobs,
     applicants,
-    applicantsLoading,
     fetchApplicants,
   } = useAppStore();
 
@@ -159,11 +158,11 @@ export default function JobDetail() {
     await fetchApplicants(id);
   };
 
-  if (jobLoading) {
+  if (jobsLoading && !selectedJob) {
     return <JobDetailSkeleton />;
   }
 
-  if (jobError || !job) {
+  if (jobsError || !selectedJob) {
     return (
       <div className="site-container py-20">
         <div className="glass mx-auto max-w-2xl rounded-3xl p-10 text-center">
@@ -176,7 +175,7 @@ export default function JobDetail() {
           </h1>
 
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-            {jobError ||
+            {jobsError ||
               "The job may have been removed or is no longer available."}
           </p>
 
@@ -200,28 +199,28 @@ export default function JobDetail() {
     );
   }
 
-  const companyName = getCompanyName(job);
-  const location = getLocation(job);
-  const jobType = getJobType(job);
-  const salary = getSalary(job);
-  const requirements = getRequirements(job);
-  const createdDate = getCreatedDate(job);
+  const companyName = getCompanyName(selectedJob);
+  const location = getLocation(selectedJob);
+  const jobType = getJobType(selectedJob);
+  const salary = getSalary(selectedJob);
+  const requirements = getRequirements(selectedJob);
+  const createdDate = getCreatedDate(selectedJob);
 
   const applicationStatus = applicationStatusByJobId?.[id] || null;
 
   const hasApplied =
     applicationStatus !== null && applicationStatus !== undefined;
 
-  const isPending = applicationsLoading === id || applicationsLoading === true;
+  const isPending = applicationsLoading === true;
 
   const isRecruiter = user?.role === "recruiter";
   const isCandidate = user?.role === "candidate";
 
   const recruiterOwnsJob =
     isRecruiter &&
-    job.created_by &&
+    selectedJob.created_by &&
     user?._id &&
-    String(job.created_by) === String(user._id);
+    String(selectedJob.created_by) === String(user._id);
 
   return (
     <div className="min-h-screen pb-20">
@@ -230,6 +229,7 @@ export default function JobDetail() {
         <div className="absolute inset-0 subtle-grid opacity-30" />
 
         <div className="absolute left-1/4 top-10 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
+
         <div className="absolute right-1/4 top-24 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="site-container relative py-8 sm:py-12">
@@ -249,15 +249,15 @@ export default function JobDetail() {
                   {formatJobType(jobType)}
                 </span>
 
-                {job.category && (
+                {selectedJob.category && (
                   <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-400">
-                    {job.category}
+                    {selectedJob.category}
                   </span>
                 )}
               </div>
 
               <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                {job.title}
+                {selectedJob.title}
               </h1>
 
               <div className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-sm text-slate-400">
@@ -287,22 +287,20 @@ export default function JobDetail() {
         </div>
       </section>
 
-      {/* Content */}
+      {/* Main content */}
       <section className="site-container pt-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-          {/* Main */}
+          {/* Main column */}
           <main className="space-y-6">
-            {/* Overview */}
             <section className="glass rounded-3xl p-6 sm:p-8">
               <SectionHeading icon={FileText} title="About the role" />
 
               <div className="mt-6 whitespace-pre-line text-sm leading-7 text-slate-400 sm:text-base">
-                {job.description ||
+                {selectedJob.description ||
                   "The hiring team has not provided a detailed description for this opportunity yet."}
               </div>
             </section>
 
-            {/* Requirements */}
             <section className="glass rounded-3xl p-6 sm:p-8">
               <SectionHeading
                 icon={ShieldCheck}
@@ -316,9 +314,7 @@ export default function JobDetail() {
                       key={`${requirement}-${index}`}
                       className="flex gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4"
                     >
-                      <div className="mt-0.5 shrink-0">
-                        <CheckCircle2 className="h-5 w-5 text-cyan-400" />
-                      </div>
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-cyan-400" />
 
                       <span className="text-sm leading-6 text-slate-300">
                         {requirement}
@@ -333,7 +329,6 @@ export default function JobDetail() {
               )}
             </section>
 
-            {/* Recruiter view */}
             {recruiterOwnsJob && (
               <section className="rounded-3xl border border-violet-400/15 bg-violet-500/[0.06] p-6 sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -349,7 +344,7 @@ export default function JobDetail() {
 
                     <p className="mt-2 text-sm leading-6 text-slate-500">
                       View applicants and manage their application status from
-                      your recruiter dashboard.
+                      your recruiter workspace.
                     </p>
                   </div>
 
@@ -362,13 +357,6 @@ export default function JobDetail() {
                     View applicants
                   </button>
                 </div>
-
-                {applicantsLoading && (
-                  <div className="mt-5 flex items-center gap-2 text-sm text-slate-500">
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Loading applicants...
-                  </div>
-                )}
 
                 {applicants?.length > 0 && (
                   <div className="mt-6 space-y-2">
@@ -407,7 +395,6 @@ export default function JobDetail() {
           {/* Sidebar */}
           <aside>
             <div className="space-y-4 lg:sticky lg:top-28">
-              {/* Apply card */}
               <section className="glass overflow-hidden rounded-3xl">
                 <div className="border-b border-white/5 p-6">
                   <div className="section-eyebrow mb-4">
@@ -482,7 +469,6 @@ export default function JobDetail() {
                 </div>
               </section>
 
-              {/* Job facts */}
               <section className="glass rounded-3xl p-6">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
                   Job details
@@ -509,17 +495,16 @@ export default function JobDetail() {
                     value={formatDate(createdDate)}
                   />
 
-                  {job.position !== undefined && (
+                  {selectedJob.position !== undefined && (
                     <JobFact
                       icon={Users}
                       label="Open positions"
-                      value={String(job.position)}
+                      value={String(selectedJob.position)}
                     />
                   )}
                 </div>
               </section>
 
-              {/* Trust */}
               <div className="rounded-3xl border border-cyan-400/10 bg-cyan-500/[0.04] p-5">
                 <div className="flex gap-3">
                   <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-cyan-400" />
@@ -584,12 +569,14 @@ function ApplicationStatus({ status }) {
       description: "Your application is waiting for review by the hiring team.",
       className: "border-amber-400/15 bg-amber-500/[0.06] text-amber-300",
     },
+
     accepted: {
       icon: CheckCircle2,
       title: "Application accepted",
       description: "The hiring team has accepted your application.",
       className: "border-emerald-400/15 bg-emerald-500/[0.06] text-emerald-300",
     },
+
     rejected: {
       icon: XCircle,
       title: "Application not selected",
