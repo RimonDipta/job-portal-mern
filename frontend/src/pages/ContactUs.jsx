@@ -3,7 +3,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Github,
-  Linkedin,
   Mail,
   MessageSquare,
   Send,
@@ -47,13 +46,20 @@ export default function ContactUs() {
 
   return (
     <div className="relative overflow-hidden">
-      {/* Background atmosphere */}
+      {/* =========================================================
+          BACKGROUND ATMOSPHERE
+      ========================================================== */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-1/3 top-0 h-[480px] w-[620px] rounded-full bg-violet-600/10 blur-[150px]" />
+
         <div className="absolute -right-20 top-[600px] h-[360px] w-[360px] rounded-full bg-cyan-400/5 blur-[120px]" />
+
+        <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full bg-indigo-500/[0.04] blur-[120px]" />
       </div>
 
-      {/* Hero */}
+      {/* =========================================================
+          HERO
+      ========================================================== */}
       <section className="section pb-10">
         <div className="site-container">
           <div className="mx-auto max-w-3xl text-center">
@@ -62,45 +68,63 @@ export default function ContactUs() {
               Contact
             </div>
 
-            <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 text-4xl font-bold tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
               Let&apos;s start a{" "}
               <span className="gradient-text">conversation.</span>
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-              Have a question about the platform, the candidate experience, or
-              recruiter workflows? Send a message through the form below.
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-500 sm:text-lg">
+              Have a question about the platform, candidate experience, or
+              recruiter workflow? Use the form below to explore the contact
+              experience.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Main content */}
+      {/* =========================================================
+          MAIN CONTENT
+      ========================================================== */}
       <section className="section pt-8">
         <div className="site-container">
           <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
-            {/* Contact information */}
+            {/* =====================================================
+                LEFT — INFORMATION
+            ====================================================== */}
             <aside className="space-y-4">
+              {/* Project information */}
               <div className="glass rounded-3xl p-6 sm:p-7">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 text-violet-300">
                   <Mail className="h-5 w-5" />
                 </div>
 
-                <h2 className="mt-5 text-lg font-semibold text-white">Email</h2>
+                <h2 className="mt-5 text-lg font-semibold text-white">
+                  Project contact
+                </h2>
 
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                  For general questions about the project or platform.
+                  This project is currently presented as a portfolio
+                  application. There is no dedicated support mailbox connected
+                  to the platform yet.
                 </p>
 
-                <a
-                  href="mailto:support@jobportal.com"
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-violet-300 transition-colors hover:text-violet-200"
-                >
-                  support@jobportal.com
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </a>
+                <div className="mt-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+                    Current status
+                  </p>
+
+                  <p className="mt-2 text-sm font-medium text-slate-300">
+                    Frontend contact experience
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                    Backend message delivery can be connected as a future
+                    feature.
+                  </p>
+                </div>
               </div>
 
+              {/* Platform questions */}
               <div className="glass rounded-3xl p-6 sm:p-7">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
                   <MessageSquare className="h-5 w-5" />
@@ -111,8 +135,8 @@ export default function ContactUs() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Ask about job discovery, applications, recruiter tools, or
-                  account workflows.
+                  Explore job discovery, applications, recruiter tools, and
+                  account workflows directly in the application.
                 </p>
 
                 <Link
@@ -124,53 +148,48 @@ export default function ContactUs() {
                 </Link>
               </div>
 
+              {/* Project links */}
               <div className="glass rounded-3xl p-6 sm:p-7">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Project links
                 </p>
 
-                <div className="mt-5 flex flex-wrap gap-3">
+                <div className="mt-5">
                   <a
                     href="https://github.com/RimonDipta/job-portal-mern"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white"
                   >
                     <Github className="h-4 w-4" />
-                    GitHub
-                  </a>
-
-                  <a
-                    href="https://www.linkedin.com/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white"
-                  >
-                    <Linkedin className="h-4 w-4" />
-                    LinkedIn
+                    GitHub repository
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </a>
                 </div>
               </div>
             </aside>
 
-            {/* Form */}
+            {/* =====================================================
+                RIGHT — FORM
+            ====================================================== */}
             <div className="glass rounded-3xl p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                 <div>
                   <div className="flex items-center gap-2 text-violet-300">
                     <Sparkles className="h-4 w-4" />
+
                     <span className="text-xs font-semibold uppercase tracking-[0.16em]">
                       Send a message
                     </span>
                   </div>
 
-                  <h2 className="mt-3 text-2xl font-bold text-white">
+                  <h2 className="mt-3 text-2xl font-bold tracking-tight text-white">
                     How can we help?
                   </h2>
 
                   <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                    Fill out the form with enough context for us to understand
-                    your question.
+                    Fill out the form to experience the contact workflow.
+                    Message delivery is not connected to a backend service yet.
                   </p>
                 </div>
 
@@ -179,6 +198,7 @@ export default function ContactUs() {
                 </div>
               </div>
 
+              {/* Success */}
               {submitted && (
                 <div className="mt-7 flex items-start gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.06] p-4">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
@@ -189,14 +209,16 @@ export default function ContactUs() {
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-emerald-300/70">
-                      The form submission was captured successfully in this demo
-                      interface.
+                      The form interaction was completed successfully in this
+                      demo interface. No message was sent to an external
+                      service.
                     </p>
                   </div>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+                {/* Name + email */}
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
                     <label
@@ -237,6 +259,7 @@ export default function ContactUs() {
                   </div>
                 </div>
 
+                {/* Message */}
                 <div>
                   <label
                     htmlFor="contact-message"
@@ -256,10 +279,11 @@ export default function ContactUs() {
                   />
                 </div>
 
+                {/* Form disclosure + action */}
                 <div className="flex flex-col gap-4 border-t border-white/[0.06] pt-5 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs leading-5 text-slate-600">
+                  <p className="max-w-md text-xs leading-5 text-slate-600">
                     This form currently demonstrates the frontend interaction
-                    and does not send data to a backend service.
+                    only. It does not send or store your message.
                   </p>
 
                   <button
@@ -276,7 +300,9 @@ export default function ContactUs() {
         </div>
       </section>
 
-      {/* Bottom CTA */}
+      {/* =========================================================
+          BOTTOM CTA
+      ========================================================== */}
       <section className="section pt-10">
         <div className="site-container">
           <div className="rounded-3xl border border-white/[0.05] bg-white/[0.02] p-7 text-center sm:p-10">
