@@ -1,31 +1,74 @@
-import React from 'react';
-import { Users, FileCheck, Building2, UserCheck } from 'lucide-react';
+import React from "react";
+import { BriefcaseBusiness, Building2, ShieldCheck, Users } from "lucide-react";
 
 export default function Stats() {
   const stats = [
-    { label: 'Active Candidates', value: '12k+', icon: Users, color: 'text-violet-450 bg-violet-950/40' },
-    { label: 'Verified Companies', value: '450+', icon: Building2, color: 'text-blue-400 bg-blue-950/40' },
-    { label: 'Jobs Fulfilled', value: '8.5k+', icon: FileCheck, color: 'text-emerald-400 bg-emerald-950/40' },
-    { label: 'Applications Handled', value: '32k+', icon: UserCheck, color: 'text-indigo-450 bg-indigo-950/40' },
+    {
+      value: "2",
+      label: "User roles",
+      description: "Candidates & recruiters",
+      icon: Users,
+    },
+    {
+      value: "10+",
+      label: "Core workflows",
+      description: "From search to hiring",
+      icon: BriefcaseBusiness,
+    },
+    {
+      value: "JWT",
+      label: "Authentication",
+      description: "Protected API access",
+      icon: ShieldCheck,
+    },
+    {
+      value: "MERN",
+      label: "Technology stack",
+      description: "React, Node, MongoDB",
+      icon: Building2,
+    },
   ];
 
   return (
-    <div className="bg-slate-900 py-16 border-b border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, i) => (
-            <div key={i} className="bg-slate-850/30 glass p-6 rounded-2xl border border-slate-800 flex items-center gap-4 hover:border-slate-700 transition-colors">
-              <div className={`p-4 rounded-xl shrink-0 ${stat.color} border border-white/5`}>
-                <stat.icon className="h-6 w-6" />
+    <section className="border-y border-white/[0.06] bg-[#091423]/70">
+      <div className="site-container">
+        <div className="grid grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+
+            return (
+              <div
+                key={stat.label}
+                className={`group px-5 py-8 sm:px-8 ${
+                  index < stats.length - 1 ? "border-r border-white/[0.06]" : ""
+                } ${
+                  index < 2 ? "border-b lg:border-b-0 border-white/[0.06]" : ""
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-400/10 bg-violet-400/[0.06] text-violet-300 transition-transform duration-200 group-hover:scale-105">
+                    <Icon className="h-4.5 w-4.5" />
+                  </div>
+
+                  <div>
+                    <p className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                      {stat.value}
+                    </p>
+
+                    <p className="mt-1 text-xs font-semibold text-slate-300 sm:text-sm">
+                      {stat.label}
+                    </p>
+
+                    <p className="mt-1 text-[11px] text-slate-600 sm:text-xs">
+                      {stat.description}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-2xl md:text-3xl font-extrabold text-white">{stat.value}</h3>
-                <p className="text-xs md:text-sm text-slate-400 font-medium mt-0.5">{stat.label}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

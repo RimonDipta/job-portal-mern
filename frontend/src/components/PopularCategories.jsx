@@ -1,48 +1,139 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Layout, Server, Figma, Cpu, Compass, Layers } from 'lucide-react';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowUpRight,
+  Code2,
+  Compass,
+  Database,
+  Figma,
+  Layers3,
+  Smartphone,
+} from "lucide-react";
 
 export default function PopularCategories() {
   const navigate = useNavigate();
 
   const categories = [
-    { name: 'Frontend Engineering', icon: Layout, query: 'Frontend', count: '120+ Jobs', color: 'text-violet-400 border-violet-500/20 bg-violet-950/20' },
-    { name: 'Backend Engineering', icon: Server, query: 'Backend', count: '95+ Jobs', color: 'text-emerald-400 border-emerald-500/20 bg-emerald-950/20' },
-    { name: 'UI/UX Design', icon: Figma, query: 'Design', count: '45+ Jobs', color: 'text-pink-400 border-pink-500/20 bg-pink-950/20' },
-    { name: 'Product Management', icon: Compass, query: 'Manager', count: '30+ Jobs', color: 'text-amber-400 border-amber-500/20 bg-amber-950/20' },
-    { name: 'Full Stack Development', icon: Layers, query: 'Full Stack', count: '80+ Jobs', color: 'text-blue-400 border-blue-500/20 bg-blue-950/20' },
-    { name: 'Mobile Developer', icon: Cpu, query: 'Mobile', count: '15+ Jobs', color: 'text-indigo-400 border-indigo-500/20 bg-indigo-950/20' },
+    {
+      name: "Frontend",
+      description: "React, Vue, Angular & modern web",
+      query: "Frontend",
+      icon: Code2,
+      accent: "from-violet-500/20 to-violet-500/0",
+      iconClass: "text-violet-300 bg-violet-400/10",
+    },
+    {
+      name: "Backend",
+      description: "APIs, services & server systems",
+      query: "Backend",
+      icon: Database,
+      accent: "from-cyan-500/20 to-cyan-500/0",
+      iconClass: "text-cyan-300 bg-cyan-400/10",
+    },
+    {
+      name: "Product Design",
+      description: "UI, UX & digital experiences",
+      query: "Design",
+      icon: Figma,
+      accent: "from-pink-500/20 to-pink-500/0",
+      iconClass: "text-pink-300 bg-pink-400/10",
+    },
+    {
+      name: "Product",
+      description: "Strategy, research & leadership",
+      query: "Manager",
+      icon: Compass,
+      accent: "from-amber-500/20 to-amber-500/0",
+      iconClass: "text-amber-300 bg-amber-400/10",
+    },
+    {
+      name: "Full Stack",
+      description: "End-to-end application development",
+      query: "Full Stack",
+      icon: Layers3,
+      accent: "from-indigo-500/20 to-indigo-500/0",
+      iconClass: "text-indigo-300 bg-indigo-400/10",
+    },
+    {
+      name: "Mobile",
+      description: "iOS, Android & cross-platform apps",
+      query: "Mobile",
+      icon: Smartphone,
+      accent: "from-emerald-500/20 to-emerald-500/0",
+      iconClass: "text-emerald-300 bg-emerald-400/10",
+    },
   ];
 
   return (
-    <div className="bg-slate-900 py-20 border-b border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Popular Job Categories</h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-sm md:text-base">
-            Explore diverse career pathways. Click on any category block to view currently hiring opportunities.
-          </p>
+    <section className="section border-b border-white/[0.06]">
+      <div className="site-container">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <span className="section-eyebrow">Explore opportunities</span>
+
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Find work in your field.
+            </h2>
+
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
+              Browse focused job categories and discover roles that match the
+              way you want to build your career.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate("/jobs")}
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-violet-300 transition-colors hover:text-violet-200"
+          >
+            Browse all jobs
+            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((cat, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => navigate(`/jobs?category=${encodeURIComponent(cat.query)}`)}
-              className="bg-slate-850/40 glass border border-slate-850 p-6 rounded-2xl hover:border-violet-500/30 flex items-center gap-4 text-left transition-all duration-300 hover:shadow-xl hover:shadow-violet-950/15 group w-full"
-            >
-              <div className={`p-4 rounded-xl shrink-0 border ${cat.color}`}>
-                <cat.icon className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white group-hover:text-violet-400 transition-colors leading-tight">{cat.name}</h3>
-                <p className="text-sm text-slate-500 font-medium mt-1">{cat.count}</p>
-              </div>
-            </button>
-          ))}
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {categories.map((category) => {
+            const Icon = category.icon;
+
+            return (
+              <button
+                key={category.name}
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/jobs?category=${encodeURIComponent(category.query)}`,
+                  )
+                }
+                className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.035]"
+              >
+                <div
+                  className={`pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${category.accent} opacity-70`}
+                />
+
+                <div className="relative">
+                  <div className="flex items-start justify-between">
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${category.iconClass}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <ArrowUpRight className="h-4 w-4 text-slate-700 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-slate-300" />
+                  </div>
+
+                  <h3 className="mt-6 text-base font-semibold text-white">
+                    {category.name}
+                  </h3>
+
+                  <p className="mt-1.5 text-sm leading-6 text-slate-500">
+                    {category.description}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

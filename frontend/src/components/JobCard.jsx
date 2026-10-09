@@ -1,59 +1,86 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { MapPin, Briefcase, DollarSign, Calendar } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  ArrowUpRight,
+  BriefcaseBusiness,
+  CalendarDays,
+  DollarSign,
+  MapPin,
+} from "lucide-react";
 
 export default function JobCard({ job }) {
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    if (!dateString) {
+      return "Recently";
+    }
+
+    return new Date(dateString).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   return (
-    <div className="bg-slate-850/50 glass hover:bg-slate-800/80 transition-all duration-300 p-6 rounded-2xl flex flex-col justify-between border border-slate-800 hover:border-violet-500/30 hover:shadow-xl hover:shadow-violet-950/10 group">
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-violet-950/80 text-violet-300 border border-violet-850/50 uppercase tracking-wider">
-            {job.jobType}
-          </span>
-          <span className="text-xs text-slate-500 flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5" />
-            {formatDate(job.createdAt)}
-          </span>
+    <article className="group flex h-full flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/20 hover:bg-white/[0.035] hover:shadow-xl hover:shadow-violet-950/10">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-violet-400/10 bg-gradient-to-br from-violet-500/15 to-cyan-400/10 text-violet-300">
+          <BriefcaseBusiness className="h-5 w-5" />
         </div>
 
-        <h3 className="text-xl font-bold text-white group-hover:text-violet-400 transition-colors line-clamp-1">
+        <span className="rounded-full border border-violet-400/10 bg-violet-400/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-violet-300">
+          {job.jobType || "Full-time"}
+        </span>
+      </div>
+
+      <div className="mt-5">
+        <h3 className="line-clamp-1 text-lg font-bold tracking-tight text-white transition-colors group-hover:text-violet-300">
           {job.title}
         </h3>
-        <p className="text-sm font-semibold text-slate-400 mb-4">{job.company}</p>
 
-        <p className="text-slate-300 text-sm mb-6 line-clamp-2 leading-relaxed">
-          {job.description}
-        </p>
+        <p className="mt-1 text-sm font-medium text-slate-500">{job.company}</p>
       </div>
 
-      <div>
-        <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm text-slate-400 mb-6 border-t border-slate-800/60 pt-4">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-violet-400 shrink-0" />
-            <span className="line-clamp-1">{job.location}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-emerald-450 shrink-0" />
-            <span className="line-clamp-1 text-emerald-400 font-medium">{job.salary}</span>
-          </div>
-          <div className="flex items-center gap-2 col-span-2">
-            <Briefcase className="h-4 w-4 text-violet-400 shrink-0" />
-            <span className="line-clamp-1">Positions: {job.position} Openings</span>
-          </div>
+      <p className="mt-4 line-clamp-2 text-sm leading-6 text-slate-500">
+        {job.description}
+      </p>
+
+      <div className="mt-5 grid grid-cols-2 gap-2 border-y border-white/[0.06] py-4 text-xs text-slate-500">
+        <div className="flex min-w-0 items-center gap-2">
+          <MapPin className="h-3.5 w-3.5 shrink-0 text-cyan-400/80" />
+
+          <span className="truncate">{job.location || "Remote"}</span>
         </div>
 
-        <Link
-          to={`/jobs/${job._id}`}
-          className="block w-full text-center bg-slate-850 hover:bg-violet-600 text-white font-medium py-2.5 rounded-xl border border-slate-700 hover:border-violet-600 transition-all duration-200"
-        >
-          View Job Details
-        </Link>
+        <div className="flex min-w-0 items-center gap-2">
+          <DollarSign className="h-3.5 w-3.5 shrink-0 text-emerald-400/80" />
+
+          <span className="truncate">{job.salary || "Competitive"}</span>
+        </div>
+
+        <div className="flex min-w-0 items-center gap-2">
+          <BriefcaseBusiness className="h-3.5 w-3.5 shrink-0 text-violet-400/80" />
+
+          <span className="truncate">
+            {job.position || 1} opening
+            {Number(job.position) === 1 ? "" : "s"}
+          </span>
+        </div>
+
+        <div className="flex min-w-0 items-center gap-2">
+          <CalendarDays className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+
+          <span className="truncate">{formatDate(job.createdAt)}</span>
+        </div>
       </div>
-    </div>
+
+      <Link
+        to={`/jobs/${job._id}`}
+        className="group/link mt-5 flex items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 text-sm font-semibold text-slate-300 transition-all hover:border-violet-400/20 hover:bg-violet-500/[0.06] hover:text-white"
+      >
+        View opportunity
+        <ArrowUpRight className="h-4 w-4 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
+      </Link>
+    </article>
   );
 }
