@@ -11,7 +11,6 @@ import {
   Edit3,
   FileText,
   FileUp,
-  Info,
   Mail,
   MapPin,
   Pencil,
@@ -23,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 
+import { api } from "../lib/api";
 import { useAppStore } from "../store/useAppStore";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
@@ -30,13 +30,11 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 const BACKEND_URL = API_URL.replace(/\/api\/v1\/?$/, "");
 
 const formatDate = (value) => {
-  if (!value) return "â€”";
+  if (!value) return "—";
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
-    return "â€”";
-  }
+  if (Number.isNaN(date.getTime())) return "—";
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -48,13 +46,8 @@ const formatDate = (value) => {
 const getInitials = (name = "") => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
 
-  if (parts.length === 0) {
-    return "U";
-  }
-
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
+  if (parts.length === 0) return "U";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
 
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 };
@@ -181,21 +174,23 @@ export default function Profile() {
       : "overview";
 
   const [showEditModal, setShowEditModal] = useState(false);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [skills, setSkills] = useState("");
   const [resumeFile, setResumeFile] = useState(null);
+
   const [modalFeedback, setModalFeedback] = useState({
     type: "",
     message: "",
   });
 
+  // State for authenticated resume access.
+  const [resumeLoading, setResumeLoading] = useState(false);
+  const [resumeError, setResumeError] = useState("");
+
   useEffect(() => {
-    if (!user) {
-      return;
-    }
+    if (!user) return;
 
     setName(user.name || "");
     setEmail(user.email || "");
@@ -228,12 +223,7 @@ export default function Profile() {
       (application) => !application.status || application.status === "pending",
     ).length;
 
-    return {
-      total,
-      accepted,
-      rejected,
-      pending,
-    };
+    return { total, accepted, rejected, pending };
   }, [appliedJobs]);
 
   const openEditModal = () => {
@@ -242,33 +232,99 @@ export default function Profile() {
     setBio(user?.profile?.bio || "");
     setSkills(user?.profile?.skills?.join(", ") || "");
     setResumeFile(null);
-    setModalFeedback({
-      type: "",
-      message: "",
-    });
+    setModalFeedback({ type: "", message: "" });
     setShowEditModal(true);
   };
 
   const closeEditModal = () => {
-    if (authLoading) {
-      return;
-    }
+    if (authLoading) return;
 
     setShowEditModal(false);
     setResumeFile(null);
-    setModalFeedback({
-      type: "",
-      message: "",
-    });
+    setModalFeedback({ type: "", message: "" });
+  };
+
+  // Fetch the private resume through Axios so the Bearer token is included.
+  const handleOpenResume = async () => {
+    const resumePath = user?.profile?.resume;
+
+    if (!resumePath || resumeLoading) return;
+
+    setResumeLoading(true);
+    setResumeError("");
+
+    // Open the tab immediately so the browser does not block the popup.
+    const resumeWindow = window.open("", "_blank");
+
+    if (!resumeWindow) {
+      setResumeLoading(false);
+      setResumeError("Allow pop-ups in your browser to open the resume.");
+      return;
+    }
+
+    // Show a temporary message while the protected request is loading.
+    try {
+      resumeWindow.document.title = "Opening resume...";
+      resumeWindow.document.body.innerHTML =
+        '<p style="font-family: sans-serif; padding: 24px;">Loading resume...</p>';
+    } catch {
+      // Continue even if the temporary tab cannot be updated.
+    }
+
+    try {
+      // Use the stored relative path and the configured backend URL.
+      // Axios's request interceptor attaches the JWT Authorization header.
+      const response = await api.get(`${BACKEND_URL}${resumePath}`, {
+        responseType: "blob",
+      });
+
+      const contentType =
+        response.headers["content-type"] ||
+        response.data.type ||
+        "application/octet-stream";
+
+      const blob = new Blob([response.data], { type: contentType });
+      const objectUrl = URL.createObjectURL(blob);
+
+      // PDFs generally open in the browser; DOC/DOCX may download instead.
+      resumeWindow.location.replace(objectUrl);
+
+      // Allow time for the document viewer to load before releasing the URL.
+      window.setTimeout(() => {
+        URL.revokeObjectURL(objectUrl);
+      }, 60_000);
+    } catch (error) {
+      if (!resumeWindow.closed) {
+        resumeWindow.close();
+      }
+
+      let message = "Unable to open your resume. Please try again.";
+
+      if (error.response?.data instanceof Blob) {
+        try {
+          const errorText = await error.response.data.text();
+          const errorData = JSON.parse(errorText);
+
+          message = errorData.message || message;
+        } catch {
+          // Keep the fallback error message.
+        }
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.response?.status === 401) {
+        message = "Your session has expired. Please sign in again.";
+      }
+
+      setResumeError(message);
+    } finally {
+      setResumeLoading(false);
+    }
   };
 
   const handleUpdate = async (event) => {
     event.preventDefault();
 
-    setModalFeedback({
-      type: "",
-      message: "",
-    });
+    setModalFeedback({ type: "", message: "" });
 
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
@@ -303,10 +359,7 @@ export default function Profile() {
       setTimeout(() => {
         setShowEditModal(false);
         setResumeFile(null);
-        setModalFeedback({
-          type: "",
-          message: "",
-        });
+        setModalFeedback({ type: "", message: "" });
       }, 700);
 
       return;
@@ -353,12 +406,7 @@ export default function Profile() {
 
   const isCandidate = user.role === "candidate";
   const isRecruiter = user.role === "recruiter";
-
   const profileSkills = user.profile?.skills || [];
-
-  const resumeUrl = user.profile?.resume
-    ? `${BACKEND_URL}${user.profile.resume}`
-    : null;
 
   return (
     <div className="relative min-h-screen overflow-hidden pb-20 pt-8">
@@ -372,7 +420,7 @@ export default function Profile() {
           </p>
 
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Profile & account
+            Profile &amp; account
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
@@ -526,7 +574,7 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Main content */}
+        {/* Overview */}
         {activeTab === "overview" && (
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
             {/* Left column */}
@@ -576,7 +624,7 @@ export default function Profile() {
                           onClick={openEditModal}
                           className="mt-4 text-sm font-semibold text-violet-300 hover:text-violet-200"
                         >
-                          Add summary â†’
+                          Add summary →
                         </button>
                       </div>
                     </div>
@@ -607,7 +655,6 @@ export default function Profile() {
                   <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] p-6">
                     <div className="flex items-center gap-3">
                       <Code2 className="h-5 w-5 text-slate-500" />
-
                       <p className="text-sm text-slate-500">
                         No skills have been added yet.
                       </p>
@@ -618,7 +665,7 @@ export default function Profile() {
                       onClick={openEditModal}
                       className="mt-4 text-sm font-semibold text-violet-300 hover:text-violet-200"
                     >
-                      Add your skills â†’
+                      Add your skills →
                     </button>
                   </div>
                 )}
@@ -632,7 +679,6 @@ export default function Profile() {
                 <section className="glass overflow-hidden rounded-3xl border border-white/[0.06]">
                   <div className="border-b border-white/[0.06] p-6">
                     <p className="section-eyebrow mb-2">Candidate profile</p>
-
                     <h2 className="text-lg font-bold text-white">Resume</h2>
                   </div>
 
@@ -645,7 +691,7 @@ export default function Profile() {
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-white">
+                            <p className="break-words text-sm font-semibold text-white">
                               {user.profile.resumeOriginalName ||
                                 "Uploaded resume"}
                             </p>
@@ -657,15 +703,24 @@ export default function Profile() {
                           </div>
                         </div>
 
-                        <a
-                          href={resumeUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn-secondary mt-5 w-full"
+                        <button
+                          type="button"
+                          onClick={handleOpenResume}
+                          disabled={resumeLoading}
+                          className="btn-secondary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <FileText className="h-4 w-4" />
-                          Open resume
-                        </a>
+                          {resumeLoading ? "Opening resume..." : "Open resume"}
+                        </button>
+
+                        {resumeError && (
+                          <div
+                            role="alert"
+                            className="mt-3 rounded-xl border border-rose-400/15 bg-rose-400/10 p-3 text-sm text-rose-300"
+                          >
+                            {resumeError}
+                          </div>
+                        )}
                       </>
                     ) : (
                       <>
@@ -730,7 +785,6 @@ export default function Profile() {
                     <p className="text-sm font-semibold text-white">
                       Account information
                     </p>
-
                     <p className="text-xs text-slate-500">
                       Your registered details
                     </p>
@@ -768,9 +822,9 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Applications */}
+        {/* Application history */}
         {activeTab === "applied" && isCandidate && (
-          <section className="mt-6 glass overflow-hidden rounded-3xl border border-white/[0.06]">
+          <section className="glass mt-6 overflow-hidden rounded-3xl border border-white/[0.06]">
             <div className="border-b border-white/[0.06] p-6 sm:p-8">
               <SectionHeader
                 eyebrow="Candidate activity"
@@ -1042,12 +1096,16 @@ export default function Profile() {
 
               {isCandidate && (
                 <div className="mt-5">
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <label
+                    htmlFor="profile-resume"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500"
+                  >
                     Resume
                   </label>
 
                   <div className="relative rounded-2xl border border-dashed border-white/[0.1] bg-white/[0.025] p-5 transition-colors hover:border-violet-400/30">
                     <input
+                      id="profile-resume"
                       type="file"
                       accept=".pdf,.doc,.docx"
                       onChange={(event) =>
