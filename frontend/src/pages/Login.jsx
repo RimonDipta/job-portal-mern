@@ -1,199 +1,379 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import { useAppStore } from "../store/useAppStore";
-import { Mail, Lock, ShieldAlert } from "lucide-react";
+
+const roles = [
+  {
+    value: "candidate",
+    label: "Candidate",
+    description: "Find opportunities and apply to jobs.",
+    icon: UserRound,
+  },
+  {
+    value: "recruiter",
+    label: "Recruiter",
+    description: "Post roles and manage applicants.",
+    icon: BriefcaseBusiness,
+  },
+];
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("candidate");
-  const [feedback, setFeedback] = useState("");
-  const { login, logout, authLoading } = useAppStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFeedback("");
+  const { login, user, token, loading, error } = useAppStore();
+
+  const [role, setRole] = useState("candidate");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    if (token && user) {
+      navigate(user.role === "recruiter" ? "/dashboard" : "/", {
+        replace: true,
+      });
+    }
+  }, [token, user, navigate]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+
+    setFormError("");
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setFormError("");
+
+    const email = formData.email.trim();
+    const password = formData.password;
 
     if (!email || !password) {
-      setFeedback("Please fill out all fields.");
+      setFormError("Please enter both your email address and password.");
       return;
     }
 
-    const res = await login({ email, password });
+    try {
+      const result = await login(email, password, role);
 
-    if (!res.success) {
-      setFeedback(res.message);
-      return;
-    }
+      if (!result?.success) {
+        setFormError(
+          result?.message ||
+            "Unable to sign in. Please check your credentials.",
+        );
+        return;
+      }
 
-    const authenticatedRole = res.user?.role;
+      const authenticatedUser = result.user;
 
-    if (authenticatedRole !== role) {
-      await logout();
+      if (!authenticatedUser) {
+        setFormError(
+          "Login succeeded, but the user account could not be loaded.",
+        );
+        return;
+      }
 
-      const selectedRoleLabel =
-        role === "recruiter" ? "Recruiter" : "Candidate";
+      if (authenticatedUser.role !== role) {
+        setFormError(
+          `This account is registered as a ${authenticatedUser.role}. Please select the correct role.`,
+        );
+        return;
+      }
 
-      setFeedback(
-        `This account is registered as a ${
-          authenticatedRole === "recruiter" ? "Recruiter" : "Candidate"
-        }. Please select ${authenticatedRole === "recruiter" ? "Recruiter" : "Candidate"} to continue.`,
+      const destination =
+        location.state?.from ||
+        (authenticatedUser.role === "recruiter" ? "/dashboard" : "/");
+
+      navigate(destination, { replace: true });
+    } catch (loginError) {
+      setFormError(
+        loginError?.response?.data?.message ||
+          loginError?.message ||
+          "Something went wrong while signing in.",
       );
-
-      return;
     }
-
-    navigate(authenticatedRole === "recruiter" ? "/dashboard" : "/");
   };
 
   return (
-    <div className="min-h-[80vh] bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-          Welcome Back
+    <AuthLayout
+      eyebrow="Welcome back"
+      title={
+        <>
+          Pick up where
+          <span className="gradient-text"> you left off.</span>
+        </>
+      }
+      description="Sign in to discover opportunities, manage applications, or grow your hiring pipeline."
+    >
+      <div className="mb-7">
+        <h2 className="text-2xl font-semibold tracking-tight text-white">
+          Sign in
         </h2>
 
-        <p className="mt-2 text-center text-sm text-slate-400">
-          Or{" "}
-          <Link
-            to="/register"
-            className="font-semibold text-violet-400 hover:text-violet-300 hover:underline"
-          >
-            create a new account
-          </Link>
+        <p className="mt-2 text-sm text-slate-500">
+          Access your JobPortal account.
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-slate-850/40 glass py-8 px-4 shadow-2xl sm:rounded-3xl sm:px-10 border border-slate-800">
-          {feedback && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-950/30 border border-rose-900/40 text-rose-450 text-sm flex items-center gap-2.5 font-medium">
-              <ShieldAlert className="h-5 w-5 shrink-0 text-rose-500" />
-              <span>{feedback}</span>
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label
+            htmlFor="login-email"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Email address
+          </label>
+
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              className="focus-ring h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder:text-slate-700 focus:border-violet-400/40 focus:bg-white/[0.05]"
+            />
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <label
+              htmlFor="login-password"
+              className="block text-sm font-medium text-slate-300"
+            >
+              Password
+            </label>
+          </div>
+
+          <div className="relative">
+            <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+
+            <input
+              id="login-password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className="focus-ring h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-11 pr-12 text-sm text-white outline-none transition-colors placeholder:text-slate-700 focus:border-violet-400/40 focus:bg-white/[0.05]"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-600 transition-colors hover:text-slate-300"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-3 text-sm font-medium text-slate-300">Sign in as</p>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {roles.map((item) => {
+              const Icon = item.icon;
+              const active = role === item.value;
+
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => {
+                    setRole(item.value);
+                    setFormError("");
+                  }}
+                  className={`relative rounded-2xl border p-4 text-left transition-all ${
+                    active
+                      ? "border-violet-400/40 bg-violet-500/[0.08] shadow-lg shadow-violet-950/10"
+                      : "border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {active && (
+                    <span className="absolute right-3 top-3">
+                      <CheckCircle2 className="h-4 w-4 text-violet-400" />
+                    </span>
+                  )}
+
+                  <Icon
+                    className={`h-5 w-5 ${
+                      active ? "text-violet-400" : "text-slate-500"
+                    }`}
+                  />
+
+                  <p className="mt-3 text-sm font-semibold text-white">
+                    {item.label}
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                    {item.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {(formError || error) && <AuthError message={formError || error} />}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary min-h-12 w-full justify-center"
+        >
+          {loading ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              Signing in...
+            </>
+          ) : (
+            <>
+              Sign in
+              <ArrowRight className="h-4 w-4" />
+            </>
           )}
+        </button>
+      </form>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Role Selection */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                I want to login as:
-              </label>
+      <p className="mt-7 text-center text-sm text-slate-500">
+        Don't have an account?{" "}
+        <Link
+          to="/register"
+          className="font-medium text-violet-400 transition-colors hover:text-violet-300"
+        >
+          Create one
+        </Link>
+      </p>
+    </AuthLayout>
+  );
+}
 
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRole("candidate");
-                    setFeedback("");
-                  }}
-                  className={`py-2 px-4 rounded-xl border text-sm font-semibold transition-all duration-200 ${
-                    role === "candidate"
-                      ? "bg-violet-600/20 border-violet-500 text-violet-350"
-                      : "bg-slate-900/50 border-slate-700 text-slate-400 hover:bg-slate-800/40"
-                  }`}
-                >
-                  Candidate
-                </button>
+function AuthLayout({ eyebrow, title, description, children }) {
+  return (
+    <div className="relative min-h-[calc(100vh-72px)] overflow-hidden">
+      <div className="absolute inset-0 subtle-grid opacity-20" />
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRole("recruiter");
-                    setFeedback("");
-                  }}
-                  className={`py-2 px-4 rounded-xl border text-sm font-semibold transition-all duration-200 ${
-                    role === "recruiter"
-                      ? "bg-violet-600/20 border-violet-500 text-violet-350"
-                      : "bg-slate-900/50 border-slate-700 text-slate-400 hover:bg-slate-800/40"
-                  }`}
-                >
-                  Recruiter
-                </button>
-              </div>
-            </div>
+      <div className="absolute -left-40 top-20 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl" />
+      <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
 
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Email Address
-              </label>
+      <div className="site-container relative py-10 sm:py-16 lg:py-20">
+        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950/50 shadow-2xl shadow-black/20 lg:grid-cols-[0.9fr_1.1fr]">
+          {/* Brand panel */}
+          <div className="relative hidden overflow-hidden border-r border-white/5 bg-gradient-to-br from-violet-500/[0.10] via-transparent to-cyan-500/[0.06] p-10 lg:flex lg:flex-col lg:justify-between xl:p-14">
+            <div className="absolute -right-20 top-20 h-56 w-56 rounded-full bg-violet-500/10 blur-3xl" />
 
-              <div className="mt-1 relative rounded-md flex items-center bg-slate-900/60 border border-slate-700 focus-within:border-violet-500 transition-colors">
-                <Mail className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
-
-                <input
-                  type="email"
-                  required
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-transparent border-none text-white focus:outline-none w-full pl-11 pr-4 py-2.5 text-sm placeholder:text-slate-500"
+            <div className="relative">
+              <Link to="/" className="inline-flex items-center">
+                <img
+                  src="/brand/logo.svg"
+                  alt="JobPortal"
+                  className="h-9 w-auto"
                 />
+              </Link>
+
+              <div className="mt-24 max-w-md">
+                <div className="section-eyebrow mb-5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {eyebrow}
+                </div>
+
+                <h1 className="text-4xl font-bold leading-tight tracking-tight text-white xl:text-5xl">
+                  {title}
+                </h1>
+
+                <p className="mt-6 text-sm leading-7 text-slate-400 xl:text-base">
+                  {description}
+                </p>
               </div>
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Password
-              </label>
+            <div className="relative mt-12 grid grid-cols-2 gap-3">
+              <TrustCard
+                icon={ShieldCheck}
+                title="Protected"
+                text="Secure account access"
+              />
 
-              <div className="mt-1 relative rounded-md flex items-center bg-slate-900/60 border border-slate-700 focus-within:border-violet-500 transition-colors">
-                <Lock className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
+              <TrustCard
+                icon={BriefcaseBusiness}
+                title="Built for hiring"
+                text="One platform, two roles"
+              />
+            </div>
+          </div>
 
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-transparent border-none text-white focus:outline-none w-full pl-11 pr-4 py-2.5 text-sm placeholder:text-slate-500"
+          {/* Form */}
+          <div className="p-6 sm:p-10 lg:p-12 xl:p-14">
+            <div className="mb-10 lg:hidden">
+              <Link to="/" className="inline-flex items-center">
+                <img
+                  src="/brand/logo.svg"
+                  alt="JobPortal"
+                  className="h-8 w-auto"
                 />
-              </div>
+              </Link>
             </div>
 
-            {/* Submit */}
-            <div>
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-violet-600 hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-all duration-200 disabled:opacity-50"
-              >
-                {authLoading ? "Signing In..." : "Sign In"}
-              </button>
-            </div>
-          </form>
-
-          {/* Demo Accounts */}
-          <div className="mt-6 border-t border-slate-805 pt-4 text-xs text-slate-400 bg-slate-900/20 p-3 rounded-lg border border-slate-800/80">
-            <p className="font-semibold text-slate-350 mb-1">
-              Quick Demo Accounts:
-            </p>
-
-            <ul className="space-y-1">
-              <li>
-                Candidate:{" "}
-                <span className="text-violet-400 font-mono">
-                  candidate@gmail.com
-                </span>{" "}
-                /{" "}
-                <span className="text-violet-400 font-mono">candidate123</span>
-              </li>
-
-              <li>
-                Recruiter:{" "}
-                <span className="text-violet-400 font-mono">
-                  recruiter@techcorp.com
-                </span>{" "}
-                /{" "}
-                <span className="text-violet-400 font-mono">recruiter123</span>
-              </li>
-            </ul>
+            {children}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function TrustCard({ icon: Icon, title, text }) {
+  return (
+    <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-4">
+      <Icon className="h-5 w-5 text-violet-400" />
+
+      <p className="mt-4 text-sm font-semibold text-white">{title}</p>
+
+      <p className="mt-1 text-xs text-slate-600">{text}</p>
+    </div>
+  );
+}
+
+function AuthError({ message }) {
+  return (
+    <div className="rounded-xl border border-rose-400/15 bg-rose-500/[0.06] px-4 py-3">
+      <p className="text-sm leading-6 text-rose-300">{message}</p>
     </div>
   );
 }

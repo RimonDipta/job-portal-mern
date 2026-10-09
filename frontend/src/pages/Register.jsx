@@ -1,159 +1,440 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAppStore } from '../store/useAppStore';
-import { Mail, Lock, User, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+  UserRoundPlus,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { useAppStore } from "../store/useAppStore";
+
+const roles = [
+  {
+    value: "candidate",
+    label: "Candidate",
+    description: "Build your profile and find your next role.",
+    icon: UserRound,
+  },
+  {
+    value: "recruiter",
+    label: "Recruiter",
+    description: "Find candidates and manage your hiring pipeline.",
+    icon: BriefcaseBusiness,
+  },
+];
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('candidate');
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
-  const { register, authLoading } = useAppStore();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFeedback({ type: '', message: '' });
-    if (!name || !email || !password) {
-      setFeedback({ type: 'error', message: 'Please fill out all fields.' });
+  const { register, user, token, loading, error } = useAppStore();
+
+  const [role, setRole] = useState("candidate");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    if (token && user) {
+      navigate(user.role === "recruiter" ? "/dashboard" : "/", {
+        replace: true,
+      });
+    }
+  }, [token, user, navigate]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+
+    setFormError("");
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setFormError("");
+
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const password = formData.password;
+    const confirmPassword = formData.confirmPassword;
+
+    if (!name || !email || !password || !confirmPassword) {
+      setFormError("Please complete all required fields.");
       return;
     }
 
-    const res = await register({ name, email, password, role });
-    if (res.success) {
-      setFeedback({ type: 'success', message: res.message + ' Redirecting to login page...' });
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } else {
-      setFeedback({ type: 'error', message: res.message });
+    if (password.length < 6) {
+      setFormError("Password must contain at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setFormError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const result = await register(name, email, password, role);
+
+      if (!result?.success) {
+        setFormError(result?.message || "Unable to create your account.");
+        return;
+      }
+
+      const registeredUser = result.user;
+
+      if (registeredUser) {
+        navigate(registeredUser.role === "recruiter" ? "/dashboard" : "/", {
+          replace: true,
+        });
+      } else {
+        navigate("/login", { replace: true });
+      }
+    } catch (registerError) {
+      setFormError(
+        registerError?.response?.data?.message ||
+          registerError?.message ||
+          "Something went wrong while creating your account.",
+      );
     }
   };
 
   return (
-    <div className="min-h-[80vh] bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-          Create Your Account
+    <AuthLayout
+      eyebrow="Create your account"
+      title={
+        <>
+          Your next opportunity
+          <span className="gradient-text"> starts here.</span>
+        </>
+      }
+      description="Join the platform as a candidate or recruiter and turn your next career move into something concrete."
+    >
+      <div className="mb-7">
+        <h2 className="text-2xl font-semibold tracking-tight text-white">
+          Create account
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-400">
-          Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-violet-400 hover:text-violet-300 hover:underline">
-            Sign in here
-          </Link>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Set up your JobPortal account in a few steps.
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-slate-850/40 glass py-8 px-4 shadow-2xl sm:rounded-3xl sm:px-10 border border-slate-800">
-          
-          {feedback.message && (
-            <div className={`mb-6 p-4 rounded-xl border text-sm flex items-center gap-2.5 font-medium ${
-              feedback.type === 'success' 
-                ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-450' 
-                : 'bg-rose-950/30 border-rose-900/40 text-rose-450'
-            }`}>
-              {feedback.type === 'success' ? (
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label
+            htmlFor="register-name"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Full name
+          </label>
+
+          <div className="relative">
+            <UserRoundPlus className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+
+            <input
+              id="register-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Your full name"
+              className="focus-ring h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder:text-slate-700 focus:border-violet-400/40 focus:bg-white/[0.05]"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="register-email"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Email address
+          </label>
+
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+
+            <input
+              id="register-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              className="focus-ring h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder:text-slate-700 focus:border-violet-400/40 focus:bg-white/[0.05]"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="register-password"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Password
+          </label>
+
+          <div className="relative">
+            <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+
+            <input
+              id="register-password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="At least 6 characters"
+              className="focus-ring h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-11 pr-12 text-sm text-white outline-none transition-colors placeholder:text-slate-700 focus:border-violet-400/40 focus:bg-white/[0.05]"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-600 transition-colors hover:text-slate-300"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
               ) : (
-                <ShieldAlert className="h-5 w-5 shrink-0 text-rose-500" />
+                <Eye className="h-4 w-4" />
               )}
-              <span>{feedback.message}</span>
-            </div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="register-confirm-password"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Confirm password
+          </label>
+
+          <div className="relative">
+            <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+
+            <input
+              id="register-confirm-password"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Repeat your password"
+              className="focus-ring h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-11 pr-12 text-sm text-white outline-none transition-colors placeholder:text-slate-700 focus:border-violet-400/40 focus:bg-white/[0.05]"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((current) => !current)}
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-600 transition-colors hover:text-slate-300"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-3 text-sm font-medium text-slate-300">
+            I want to join as
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {roles.map((item) => {
+              const Icon = item.icon;
+              const active = role === item.value;
+
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => {
+                    setRole(item.value);
+                    setFormError("");
+                  }}
+                  className={`relative rounded-2xl border p-4 text-left transition-all ${
+                    active
+                      ? "border-violet-400/40 bg-violet-500/[0.08] shadow-lg shadow-violet-950/10"
+                      : "border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {active && (
+                    <span className="absolute right-3 top-3">
+                      <CheckCircle2 className="h-4 w-4 text-violet-400" />
+                    </span>
+                  )}
+
+                  <Icon
+                    className={`h-5 w-5 ${
+                      active ? "text-violet-400" : "text-slate-500"
+                    }`}
+                  />
+
+                  <p className="mt-3 text-sm font-semibold text-white">
+                    {item.label}
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                    {item.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {(formError || error) && <AuthError message={formError || error} />}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary min-h-12 w-full justify-center"
+        >
+          {loading ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              Creating account...
+            </>
+          ) : (
+            <>
+              Create account
+              <ArrowRight className="h-4 w-4" />
+            </>
           )}
+        </button>
+      </form>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Role Select Buttons */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">I want to register as:</label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole('candidate')}
-                  className={`py-2 px-4 rounded-xl border text-sm font-semibold transition-all duration-200 ${
-                    role === 'candidate'
-                      ? 'bg-violet-600/20 border-violet-500 text-violet-350'
-                      : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:bg-slate-800/40'
-                  }`}
-                >
-                  Candidate
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('recruiter')}
-                  className={`py-2 px-4 rounded-xl border text-sm font-semibold transition-all duration-200 ${
-                    role === 'recruiter'
-                      ? 'bg-violet-600/20 border-violet-500 text-violet-350'
-                      : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:bg-slate-800/40'
-                  }`}
-                >
-                  Recruiter
-                </button>
-              </div>
-            </div>
+      <p className="mt-7 text-center text-sm text-slate-500">
+        Already have an account?{" "}
+        <Link
+          to="/login"
+          className="font-medium text-violet-400 transition-colors hover:text-violet-300"
+        >
+          Sign in
+        </Link>
+      </p>
+    </AuthLayout>
+  );
+}
 
-            {/* Name Input */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Full Name</label>
-              <div className="mt-1 relative rounded-md flex items-center bg-slate-900/60 border border-slate-700 focus-within:border-violet-500 transition-colors">
-                <User className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
-                <input
-                  type="text"
-                  required
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="bg-transparent border-none text-white focus:outline-none w-full pl-11 pr-4 py-2.5 text-sm placeholder:text-slate-500"
+function AuthLayout({ eyebrow, title, description, children }) {
+  return (
+    <div className="relative min-h-[calc(100vh-72px)] overflow-hidden">
+      <div className="absolute inset-0 subtle-grid opacity-20" />
+
+      <div className="absolute -left-40 top-20 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl" />
+      <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
+
+      <div className="site-container relative py-10 sm:py-16 lg:py-20">
+        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950/50 shadow-2xl shadow-black/20 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="relative hidden overflow-hidden border-r border-white/5 bg-gradient-to-br from-violet-500/[0.10] via-transparent to-cyan-500/[0.06] p-10 lg:flex lg:flex-col lg:justify-between xl:p-14">
+            <div className="absolute -right-20 top-20 h-56 w-56 rounded-full bg-violet-500/10 blur-3xl" />
+
+            <div className="relative">
+              <Link to="/" className="inline-flex items-center">
+                <img
+                  src="/brand/logo.svg"
+                  alt="JobPortal"
+                  className="h-9 w-auto"
                 />
+              </Link>
+
+              <div className="mt-24 max-w-md">
+                <div className="section-eyebrow mb-5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {eyebrow}
+                </div>
+
+                <h1 className="text-4xl font-bold leading-tight tracking-tight text-white xl:text-5xl">
+                  {title}
+                </h1>
+
+                <p className="mt-6 text-sm leading-7 text-slate-400 xl:text-base">
+                  {description}
+                </p>
               </div>
             </div>
 
-            {/* Email input */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-              <div className="mt-1 relative rounded-md flex items-center bg-slate-900/60 border border-slate-700 focus-within:border-violet-500 transition-colors">
-                <Mail className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
-                <input
-                  type="email"
-                  required
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-transparent border-none text-white focus:outline-none w-full pl-11 pr-4 py-2.5 text-sm placeholder:text-slate-500"
+            <div className="relative mt-12 grid grid-cols-2 gap-3">
+              <TrustCard
+                icon={ShieldCheck}
+                title="Protected"
+                text="Secure account access"
+              />
+
+              <TrustCard
+                icon={BriefcaseBusiness}
+                title="Built for hiring"
+                text="One platform, two roles"
+              />
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-10 lg:p-12 xl:p-14">
+            <div className="mb-10 lg:hidden">
+              <Link to="/" className="inline-flex items-center">
+                <img
+                  src="/brand/logo.svg"
+                  alt="JobPortal"
+                  className="h-8 w-auto"
                 />
-              </div>
+              </Link>
             </div>
 
-            {/* Password input */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
-              <div className="mt-1 relative rounded-md flex items-center bg-slate-900/60 border border-slate-700 focus-within:border-violet-500 transition-colors">
-                <Lock className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-transparent border-none text-white focus:outline-none w-full pl-11 pr-4 py-2.5 text-sm placeholder:text-slate-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-violet-600 hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-all duration-200 disabled:opacity-50"
-              >
-                {authLoading ? 'Creating Account...' : 'Register'}
-              </button>
-            </div>
-          </form>
-
+            {children}
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function TrustCard({ icon: Icon, title, text }) {
+  return (
+    <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-4">
+      <Icon className="h-5 w-5 text-violet-400" />
+
+      <p className="mt-4 text-sm font-semibold text-white">{title}</p>
+
+      <p className="mt-1 text-xs text-slate-600">{text}</p>
+    </div>
+  );
+}
+
+function AuthError({ message }) {
+  return (
+    <div className="rounded-xl border border-rose-400/15 bg-rose-500/[0.06] px-4 py-3">
+      <p className="text-sm leading-6 text-rose-300">{message}</p>
     </div>
   );
 }
