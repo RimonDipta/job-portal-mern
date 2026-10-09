@@ -34,7 +34,13 @@ const roles = [
 export default function Register() {
   const navigate = useNavigate();
 
-  const { register, user, token, loading, error } = useAppStore();
+  const {
+    register,
+    user,
+    token,
+    authLoading,
+    authError,
+  } = useAppStore();
 
   const [role, setRole] = useState("candidate");
   const [showPassword, setShowPassword] = useState(false);
@@ -82,8 +88,13 @@ export default function Register() {
       return;
     }
 
-    if (password.length < 6) {
-      setFormError("Password must contain at least 6 characters.");
+    if (name.length < 2 || name.length > 100) {
+      setFormError("Name must be between 2 and 100 characters.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setFormError("Password must contain at least 8 characters.");
       return;
     }
 
@@ -93,27 +104,32 @@ export default function Register() {
     }
 
     try {
-      const result = await register(name, email, password, role);
+      // The Zustand store expects one object, not positional arguments.
+      const result = await register({
+        name,
+        email,
+        password,
+        role,
+      });
 
       if (!result?.success) {
         setFormError(result?.message || "Unable to create your account.");
         return;
       }
 
-      const registeredUser = result.user;
-
-      if (registeredUser) {
-        navigate(registeredUser.role === "recruiter" ? "/dashboard" : "/", {
-          replace: true,
-        });
-      } else {
-        navigate("/login", { replace: true });
-      }
+      // The backend creates the account but does not log the user in.
+      navigate("/login", {
+        replace: true,
+        state: {
+          registrationSuccess: true,
+          email,
+        },
+      });
     } catch (registerError) {
       setFormError(
         registerError?.response?.data?.message ||
           registerError?.message ||
-          "Something went wrong while creating your account.",
+          "Something went wrong while creating your account."
       );
     }
   };
@@ -156,6 +172,9 @@ export default function Register() {
               name="name"
               type="text"
               autoComplete="name"
+              required
+              minLength={2}
+              maxLength={100}
               value={formData.name}
               onChange={handleChange}
               placeholder="Your full name"
@@ -180,6 +199,7 @@ export default function Register() {
               name="email"
               type="email"
               autoComplete="email"
+              required
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
@@ -204,9 +224,11 @@ export default function Register() {
               name="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
+              required
+              minLength={8}
               value={formData.password}
               onChange={handleChange}
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
               className="focus-ring h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-11 pr-12 text-sm text-white outline-none transition-colors placeholder:text-slate-700 focus:border-violet-400/40 focus:bg-white/[0.05]"
             />
 
@@ -241,6 +263,8 @@ export default function Register() {
               name="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               autoComplete="new-password"
+              required
+              minLength={8}
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Repeat your password"
@@ -249,7 +273,9 @@ export default function Register() {
 
             <button
               type="button"
-              onClick={() => setShowConfirmPassword((current) => !current)}
+              onClick={() =>
+                setShowConfirmPassword((current) => !current)
+              }
               aria-label={
                 showConfirmPassword ? "Hide password" : "Show password"
               }
@@ -264,10 +290,10 @@ export default function Register() {
           </div>
         </div>
 
-        <div>
-          <p className="mb-3 text-sm font-medium text-slate-300">
+        <fieldset>
+          <legend className="mb-3 text-sm font-medium text-slate-300">
             I want to join as
-          </p>
+          </legend>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {roles.map((item) => {
@@ -278,6 +304,7 @@ export default function Register() {
                 <button
                   key={item.value}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => {
                     setRole(item.value);
                     setFormError("");
@@ -311,16 +338,18 @@ export default function Register() {
               );
             })}
           </div>
-        </div>
+        </fieldset>
 
-        {(formError || error) && <AuthError message={formError || error} />}
+        {(formError || authError) && (
+          <AuthError message={formError || authError} />
+        )}
 
         <button
           type="submit"
-          disabled={loading}
-          className="btn-primary min-h-12 w-full justify-center"
+          disabled={authLoading}
+          className="btn-primary min-h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? (
+          {authLoading ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               Creating account...
@@ -433,7 +462,10 @@ function TrustCard({ icon: Icon, title, text }) {
 
 function AuthError({ message }) {
   return (
-    <div className="rounded-xl border border-rose-400/15 bg-rose-500/[0.06] px-4 py-3">
+    <div
+      role="alert"
+      className="rounded-xl border border-rose-400/15 bg-rose-500/[0.06] px-4 py-3"
+    >
       <p className="text-sm leading-6 text-rose-300">{message}</p>
     </div>
   );
