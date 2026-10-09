@@ -34,7 +34,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { login, user, token, loading, error } = useAppStore();
+  const { login, user, token, authLoading, authError } = useAppStore();
 
   const [role, setRole] = useState("candidate");
   const [showPassword, setShowPassword] = useState(false);
@@ -78,7 +78,12 @@ export default function Login() {
     }
 
     try {
-      const result = await login(email, password, role);
+      // The Zustand store expects a single object.
+      const result = await login({
+        email,
+        password,
+        role,
+      });
 
       if (!result?.success) {
         setFormError(
@@ -97,16 +102,27 @@ export default function Login() {
         return;
       }
 
+      // Enforce the role selected on the login form.
       if (authenticatedUser.role !== role) {
+        await useAppStore.getState().logout();
+
         setFormError(
           `This account is registered as a ${authenticatedUser.role}. Please select the correct role.`,
         );
         return;
       }
 
+      const requestedDestination = location.state?.from;
+
+      // Only allow internal application paths as return destinations.
       const destination =
-        location.state?.from ||
-        (authenticatedUser.role === "recruiter" ? "/dashboard" : "/");
+        typeof requestedDestination === "string" &&
+        requestedDestination.startsWith("/") &&
+        !requestedDestination.startsWith("//")
+          ? requestedDestination
+          : authenticatedUser.role === "recruiter"
+            ? "/dashboard"
+            : "/";
 
       navigate(destination, { replace: true });
     } catch (loginError) {
@@ -156,6 +172,7 @@ export default function Login() {
               name="email"
               type="email"
               autoComplete="email"
+              required
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
@@ -165,14 +182,12 @@ export default function Login() {
         </div>
 
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <label
-              htmlFor="login-password"
-              className="block text-sm font-medium text-slate-300"
-            >
-              Password
-            </label>
-          </div>
+          <label
+            htmlFor="login-password"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Password
+          </label>
 
           <div className="relative">
             <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
@@ -182,6 +197,7 @@ export default function Login() {
               name="password"
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
+              required
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
@@ -203,8 +219,10 @@ export default function Login() {
           </div>
         </div>
 
-        <div>
-          <p className="mb-3 text-sm font-medium text-slate-300">Sign in as</p>
+        <fieldset>
+          <legend className="mb-3 text-sm font-medium text-slate-300">
+            Sign in as
+          </legend>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {roles.map((item) => {
@@ -215,6 +233,7 @@ export default function Login() {
                 <button
                   key={item.value}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => {
                     setRole(item.value);
                     setFormError("");
@@ -248,16 +267,18 @@ export default function Login() {
               );
             })}
           </div>
-        </div>
+        </fieldset>
 
-        {(formError || error) && <AuthError message={formError || error} />}
+        {(formError || authError) && (
+          <AuthError message={formError || authError} />
+        )}
 
         <button
           type="submit"
-          disabled={loading}
-          className="btn-primary min-h-12 w-full justify-center"
+          disabled={authLoading}
+          className="btn-primary min-h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? (
+          {authLoading ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               Signing in...
@@ -294,7 +315,6 @@ function AuthLayout({ eyebrow, title, description, children }) {
 
       <div className="site-container relative py-10 sm:py-16 lg:py-20">
         <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950/50 shadow-2xl shadow-black/20 lg:grid-cols-[0.9fr_1.1fr]">
-          {/* Brand panel */}
           <div className="relative hidden overflow-hidden border-r border-white/5 bg-gradient-to-br from-violet-500/[0.10] via-transparent to-cyan-500/[0.06] p-10 lg:flex lg:flex-col lg:justify-between xl:p-14">
             <div className="absolute -right-20 top-20 h-56 w-56 rounded-full bg-violet-500/10 blur-3xl" />
 
@@ -338,7 +358,6 @@ function AuthLayout({ eyebrow, title, description, children }) {
             </div>
           </div>
 
-          {/* Form */}
           <div className="p-6 sm:p-10 lg:p-12 xl:p-14">
             <div className="mb-10 lg:hidden">
               <Link to="/" className="inline-flex items-center">
@@ -372,7 +391,10 @@ function TrustCard({ icon: Icon, title, text }) {
 
 function AuthError({ message }) {
   return (
-    <div className="rounded-xl border border-rose-400/15 bg-rose-500/[0.06] px-4 py-3">
+    <div
+      role="alert"
+      className="rounded-xl border border-rose-400/15 bg-rose-500/[0.06] px-4 py-3"
+    >
       <p className="text-sm leading-6 text-rose-300">{message}</p>
     </div>
   );
