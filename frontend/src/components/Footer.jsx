@@ -1,77 +1,128 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Briefcase, Mail, Phone, MapPin, Github, Linkedin, Twitter } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Github, Linkedin, Mail, ArrowUpRight, MapPin } from "lucide-react";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-slate-950 border-t border-slate-850 text-slate-400 py-12 transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* About Section */}
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2 text-violet-400 font-extrabold text-xl tracking-wider">
-              <Briefcase className="h-6 w-6 text-violet-500" />
-              <span>JOB<span className="text-white">PORTAL</span></span>
+    <footer className="border-t border-white/[0.07] bg-[#050c17]">
+      <div className="site-container py-14">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand */}
+          <div className="lg:col-span-2">
+            <Link to="/" className="inline-flex" aria-label="JobPortal home">
+              <img
+                src="/brand/logo.svg"
+                alt="JobPortal"
+                className="h-10 w-auto"
+              />
             </Link>
-            <p className="text-sm leading-relaxed text-slate-450">
-              Connecting brilliant talent with leading companies worldwide. Find jobs that match your skills, values, and career aspirations.
+
+            <p className="mt-5 max-w-md text-sm leading-7 text-slate-500">
+              A modern recruitment platform connecting candidates with
+              opportunities and helping recruiters build better teams.
             </p>
-            <div className="flex space-x-4 pt-2">
-              <a href="#" className="hover:text-white transition-colors"><Github className="h-5 w-5 text-slate-400 hover:text-white" /></a>
-              <a href="#" className="hover:text-white transition-colors"><Linkedin className="h-5 w-5 text-slate-400 hover:text-white" /></a>
-              <a href="#" className="hover:text-white transition-colors"><Twitter className="h-5 w-5 text-slate-400 hover:text-white" /></a>
+
+            <div className="mt-6 flex items-center gap-3">
+              <a
+                href="https://github.com/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="GitHub"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
+              >
+                <Github className="h-4 w-4" />
+              </a>
+
+              <a
+                href="https://linkedin.com/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="LinkedIn"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
+              >
+                <Linkedin className="h-4 w-4" />
+              </a>
+
+              <a
+                href="mailto:support@jobportal.com"
+                aria-label="Email"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
+              >
+                <Mail className="h-4 w-4" />
+              </a>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Platform */}
           <div>
-            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Quick Links</h3>
-            <ul className="space-y-2.5 text-sm">
-              <li><Link to="/" className="hover:text-violet-400 transition-colors">Home</Link></li>
-              <li><Link to="/jobs" className="hover:text-violet-400 transition-colors">Browse Jobs</Link></li>
-              <li><Link to="/about" className="hover:text-violet-400 transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-violet-400 transition-colors">Contact Support</Link></li>
+            <h3 className="text-sm font-semibold text-white">Platform</h3>
+
+            <ul className="mt-5 space-y-3 text-sm text-slate-500">
+              <li>
+                <Link to="/jobs" className="transition-colors hover:text-white">
+                  Find Jobs
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/register"
+                  className="transition-colors hover:text-white"
+                >
+                  Create Account
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/about"
+                  className="transition-colors hover:text-white"
+                >
+                  About Us
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/contact"
+                  className="transition-colors hover:text-white"
+                >
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Categories */}
+          {/* Contact */}
           <div>
-            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Job Categories</h3>
-            <ul className="space-y-2.5 text-sm">
-              <li><Link to="/jobs?category=frontend" className="hover:text-violet-400 transition-colors">Frontend Engineering</Link></li>
-              <li><Link to="/jobs?category=backend" className="hover:text-violet-400 transition-colors">Backend Engineering</Link></li>
-              <li><Link to="/jobs?category=design" className="hover:text-violet-400 transition-colors">UI/UX & Product Design</Link></li>
-              <li><Link to="/jobs?category=product" className="hover:text-violet-400 transition-colors">Product Management</Link></li>
-            </ul>
-          </div>
+            <h3 className="text-sm font-semibold text-white">Contact</h3>
 
-          {/* Contact Information */}
-          <div className="space-y-3">
-            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Contact Info</h3>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2.5">
-                <MapPin className="h-5 w-5 text-violet-400 shrink-0 mt-0.5" />
-                <span>123 Innovation Way, Suite 400, Tech City, TC 94016</span>
+            <ul className="mt-5 space-y-4 text-sm text-slate-500">
+              <li className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
+
+                <span>Dhaka, Bangladesh</span>
               </li>
-              <li className="flex items-center gap-2.5">
-                <Mail className="h-5 w-5 text-violet-400" />
-                <a href="mailto:support@jobportal.com" className="hover:text-white transition-colors">support@jobportal.com</a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone className="h-5 w-5 text-violet-400" />
-                <span>+1 (555) 019-2834</span>
+
+              <li>
+                <a
+                  href="mailto:support@jobportal.com"
+                  className="inline-flex items-center gap-2 transition-colors hover:text-white"
+                >
+                  support@jobportal.com
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-slate-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
-          <p>&copy; {new Date().getFullYear()} JobPortal. All rights reserved.</p>
-          <div className="flex space-x-4 mt-4 sm:mt-0">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
-          </div>
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/[0.07] pt-6 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {currentYear} JobPortal. All rights reserved.</p>
+
+          <p>Built with React, Node.js, Express & MongoDB.</p>
         </div>
       </div>
     </footer>

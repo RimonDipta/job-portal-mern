@@ -1,10 +1,8 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import ProtectedRoute from "./components/ProtectedRoute";
-import PublicOnlyRoute from "./components/PublicOnlyRoute";
 
 import Home from "./pages/Home";
 import Jobs from "./pages/Jobs";
@@ -16,22 +14,23 @@ import Dashboard from "./pages/Dashboard";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicOnlyRoute from "./components/PublicOnlyRoute";
+
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen bg-slate-900 text-slate-100 selection:bg-violet-600 selection:text-white">
+      <div className="flex min-h-screen flex-col bg-transparent text-slate-100">
         <Header />
 
         <main className="flex-grow">
           <Routes>
-            {/* Public Routes */}
             <Route path="/" element={<Home />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:id" element={<JobDetail />} />
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/contact" element={<ContactUs />} />
 
-            {/* Guest-only Authentication Routes */}
+            <Route path="/jobs" element={<Jobs />} />
+
+            <Route path="/jobs/:id" element={<JobDetail />} />
+
             <Route
               path="/login"
               element={
@@ -50,7 +49,6 @@ function App() {
               }
             />
 
-            {/* Authenticated Profile */}
             <Route
               path="/profile"
               element={
@@ -60,7 +58,6 @@ function App() {
               }
             />
 
-            {/* Recruiter-only Dashboard */}
             <Route
               path="/dashboard"
               element={
@@ -70,8 +67,9 @@ function App() {
               }
             />
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/about" element={<AboutUs />} />
+
+            <Route path="/contact" element={<ContactUs />} />
           </Routes>
         </main>
 
