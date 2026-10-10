@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 
+import { api } from "../lib/api";
 import { useAppStore } from "../store/useAppStore";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
@@ -28,12 +29,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 const BACKEND_URL = API_URL.replace(/\/api\/v1\/?$/, "");
 
 const formatDate = (value) => {
-  if (!value) return "â€”";
+  if (!value) return "Ã¢â‚¬â€";
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "â€”";
+    return "Ã¢â‚¬â€";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -175,6 +176,7 @@ export default function Dashboard() {
   });
 
   const [actionFeedback, setActionFeedback] = useState("");
+  const [resumeLoadingId, setResumeLoadingId] = useState(null);
 
   useEffect(() => {
     if (user?.role === "recruiter") {
@@ -347,6 +349,78 @@ export default function Dashboard() {
       setActionFeedback(
         response.message || "Unable to update application status.",
       );
+    }
+  };
+
+  const handleOpenResume = async (resumePath, applicationId) => {
+    if (!resumePath || resumeLoadingId) {
+      return;
+    }
+
+    setActionFeedback("");
+
+    // Open the tab synchronously so the browser does not block it as a popup.
+    const resumeWindow = window.open("", "_blank");
+
+    if (!resumeWindow) {
+      setActionFeedback(
+        "Your browser blocked the resume tab. Allow pop-ups for this site and try again.",
+      );
+      return;
+    }
+
+    setResumeLoadingId(applicationId);
+
+    try {
+      try {
+        resumeWindow.document.title = "Opening resume...";
+        resumeWindow.document.body.innerHTML =
+          '<p style="font-family: sans-serif; padding: 24px;">Loading resume...</p>';
+      } catch {
+        // The tab may not be writable in every browser; continue with the request.
+      }
+
+      const response = await api.get(`${BACKEND_URL}${resumePath}`, {
+        responseType: "blob",
+      });
+
+      const contentType =
+        response.headers["content-type"] ||
+        response.data?.type ||
+        "application/octet-stream";
+      const resumeBlob = new Blob([response.data], { type: contentType });
+      const objectUrl = URL.createObjectURL(resumeBlob);
+
+      resumeWindow.location.replace(objectUrl);
+
+      // Keep the object URL alive while the browser's document viewer loads.
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 5 * 60 * 1000);
+    } catch (error) {
+      if (!resumeWindow.closed) {
+        resumeWindow.close();
+      }
+
+      let message = "Unable to open this resume. Please try again.";
+
+      if (error.response?.data instanceof Blob) {
+        try {
+          const errorText = await error.response.data.text();
+          const errorData = JSON.parse(errorText);
+          message = errorData.message || message;
+        } catch {
+          // Keep the default message if the response is not JSON.
+        }
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.response?.status === 401) {
+        message = "Your session may have expired. Sign in again and retry.";
+      } else if (error.response?.status === 403) {
+        message = "You are not authorized to view this candidate's resume.";
+      }
+
+      setActionFeedback(message);
+    } finally {
+      setResumeLoadingId(null);
     }
   };
 
@@ -613,15 +687,19 @@ export default function Dashboard() {
 
                           <div className="flex flex-wrap items-center gap-2 xl:justify-end">
                             {resume ? (
-                              <a
-                                href={`${BACKEND_URL}${resume}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn-secondary"
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleOpenResume(resume, application._id)
+                                }
+                                disabled={resumeLoadingId !== null}
+                                className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 <FileText className="h-4 w-4" />
-                                View resume
-                              </a>
+                                {resumeLoadingId === application._id
+                                  ? "Opening resume..."
+                                  : "View resume"}
+                              </button>
                             ) : (
                               <span className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-3.5 py-2.5 text-xs text-slate-600">
                                 No resume
@@ -1064,7 +1142,7 @@ export default function Dashboard() {
                     required
                     value={salary}
                     onChange={(event) => setSalary(event.target.value)}
-                    placeholder="$80k â€“ $120k"
+                    placeholder="$80k Ã¢â‚¬â€œ $120k"
                     className="focus-ring w-full rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-violet-400/40"
                   />
                 </div>
