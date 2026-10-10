@@ -354,4 +354,4 @@ Full-Stack Web Developer
 
 ## License
 
-No license has been specified for this project yet. Add a `LICENSE` file if you intend to grant others explicit permission to use, modify, and distribute the code.
+No license has been specified for this project yet.
